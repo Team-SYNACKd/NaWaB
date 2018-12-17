@@ -20,19 +20,31 @@ def nawab_read_list():
 def nawab_twitter_retweet(api):  
    query = nawab_read_list()
 
-   if len(query) > 0:
-       for line in query:
-           print("starting new query:\t" + line)
-           for tweet in tweepy.Cursor(api.search, q=line,
-                   tweet_mode="extended").items(2):
-               user = tweet.user.screen_name
-               id = tweet.id
-               url = 'https://twitter.com/' + user +  '/status/' + str(id)
-               print(url)
-               
-               if not tweet.retweeted:
-                   tweet = api.user_timeline(id, count = 1)[0]
-                   print(tweet.text)
+   number_of_tweets = 200
+
+   try:
+       if len(query) > 0:
+           #for line in query:
+            #   print("starting new query:\t" + line)
+
+               tweet_search = tweepy.Cursor(api.search,
+                                          q='#quic',
+                                          tweet_mode="extended",
+                                          lang='en').items(number_of_tweets)
+
+               for tweet in tweet_search:
+                   user = tweet.user.screen_name
+                   id = tweet.id
+                   url = 'https://twitter.com/' + user +  '/status/' + str(id)
+                   print(url)
+   
+   except tweepy.TweepError as e:
+       print(e.reason)
+
+                      #  if not tweet.retweeted:
+                      # tweet = api.user_timeline(id, count = 1)[0]
+                      # print(tweet.text)
+
 
                        #tweet.retweet()
                        #print("\t Retweeted")
