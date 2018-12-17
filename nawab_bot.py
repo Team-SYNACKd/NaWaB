@@ -4,7 +4,8 @@ import json
 import config
 import tweepy
 
-from time import sleep
+import time
+import random
 
 def nawab_twitter_authenticate():
     auth = tweepy.OAuthHandler(config.consumer_key, config.consumer_secret)
@@ -17,27 +18,31 @@ def nawab_read_list():
     search_term = proto_list.readlines()
     return search_term
 
-def nawab_store_last_id(tweet_id):
+def nawab_store_id(tweet_id):
     ### Store a tweet id in a file
-    with open("last_tid_store.txt","w") as fp:
+    with open("last_tid_store.txt","a") as fp:
         fp.write(str(tweet_id) + str('\n'))
 
-def nawab_get_last_id():
+def nawab_get_id():
     ### Read the last retweeted id from a file
     with open("last_tid_store.txt", "r") as fp:
-        return fp.read();
+        for line in fp:
+            return line
 
-def nawab_twitter_retweet(api):  
-   query = nawab_read_list()
+def nawab_curate_list(api):
+    while True:
+        query = nawab_read_list()
+        nawab_search(api, random.choice(query))
+        time.sleep(60)
 
+def nawab_search(api, query):
    number_of_tweets = 200
 
    try:
-       last_id = nawab_get_last_id()
+       last_id = nawab_get_id()
    except FileNotFoundError as e:
        print("No tweet id found")
        last_id = None
-
 
    try:
        if len(query) > 0:
@@ -45,14 +50,14 @@ def nawab_twitter_retweet(api):
             #   print("starting new query:\t" + line)
 
                tweet_search = tweepy.Cursor(api.search,
-                                          q='#quic',
+                                          q=query,
                                           tweet_mode="extended",
                                           lang='en').items(number_of_tweets)
 
                for tweet in tweet_search:
                    user = tweet.user.screen_name
                    id = tweet.id
-                   nawab_store_last_id(id)
+                   nawab_store_id(id)
                    url = 'https://twitter.com/' + user +  '/status/' + str(id)
                    print(url)
    
@@ -72,7 +77,7 @@ def nawab_twitter_retweet(api):
 
 def main():
    api = nawab_twitter_authenticate()
-   nawab_twitter_retweet(api)
+   nawab_curate_list(api)
 
 if __name__ == "__main__":
     main()
