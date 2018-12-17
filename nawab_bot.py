@@ -17,10 +17,27 @@ def nawab_read_list():
     search_term = proto_list.readlines()
     return search_term
 
+def nawab_store_last_id(tweet_id):
+    ### Store a tweet id in a file
+    with open("last_tid_store.txt","w") as fp:
+        fp.write(str(tweet_id) + str('\n'))
+
+def nawab_get_last_id():
+    ### Read the last retweeted id from a file
+    with open("last_tid_store.txt", "r") as fp:
+        return fp.read();
+
 def nawab_twitter_retweet(api):  
    query = nawab_read_list()
 
    number_of_tweets = 200
+
+   try:
+       last_id = nawab_get_last_id()
+   except FileNotFoundError as e:
+       print("No tweet id found")
+       last_id = None
+
 
    try:
        if len(query) > 0:
@@ -35,6 +52,7 @@ def nawab_twitter_retweet(api):
                for tweet in tweet_search:
                    user = tweet.user.screen_name
                    id = tweet.id
+                   nawab_store_last_id(id)
                    url = 'https://twitter.com/' + user +  '/status/' + str(id)
                    print(url)
    
