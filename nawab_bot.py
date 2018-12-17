@@ -71,6 +71,7 @@ def nawab_search(api, query):
                 print("Id:" + str(id) + "is stored to the db from this iteration")
             except tweepy.TweepError as e:
                 print(e.reason)
+                pass
 
 def nawab_retweet_tweet(api):
     with open("tid_store.txt", "r") as fp:
@@ -81,7 +82,7 @@ def nawab_retweet_tweet(api):
                 api.retweet(tweet_id)
             except tweepy.TweepError as e:
                 print(e.reason)
-
+                pass
 def main():
    api = nawab_twitter_authenticate()
    nawab_curate_list(api)
