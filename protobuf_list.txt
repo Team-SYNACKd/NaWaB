@@ -11,3 +11,7 @@
 #IPv4
 #IPv6
 #SNI
+#HTTP2
+#HTTP/2
+#HTTP3
+#HTTP/3
