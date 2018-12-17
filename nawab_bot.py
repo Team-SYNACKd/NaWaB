@@ -33,9 +33,9 @@ def nawab_check_tweet(tweet_id):
     with open("tid_store.txt", "r") as fp:
         for line in fp:
             if line == tweet_id:
-                return 1
+                return True
             else:
-                return -1
+                return False
 
 def nawab_curate_list(api):
     query = nawab_read_list()
@@ -48,7 +48,8 @@ def nawab_search(api, query):
     try:
         last_id = nawab_get_id()
     except FileNotFoundError as e:
-        print("No tweet id found")
+        print("No tweet id found, hence assuming no file created and therefore creating the new file")
+        f = open("tid_store.txt", "w+")
         last_id = None
 
     if len(query) > 0:
@@ -59,10 +60,15 @@ def nawab_search(api, query):
                         lang='en',).items(tweet_limit):
                     user = tweets.user.screen_name
                     id = tweets.id
-                    nawab_store_id(id)
-                    url = 'https://twitter.com/' + user +  '/status/' + str(id)
-                    print(url)
-                print("Id's are stored for this iteration")
+
+                    if nawab_check_tweet(id):
+                        print("Already exists in the database")
+                    else:
+                        nawab_store_id(id)
+                        url = 'https://twitter.com/' + user +  '/status/' + str(id)
+                        print(url)
+
+                print("Id:" + str(id) + "is stored to the db from this iteration")
             except tweepy.TweepError as e:
                 print(e.reason)
 
