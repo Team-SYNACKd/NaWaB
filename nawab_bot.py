@@ -50,7 +50,8 @@ def nawab_search(api, query):
     try:
         last_id = nawab_get_id()
     except FileNotFoundError as e:
-        print("No tweet id found, hence assuming no file created and therefore creating the new file")
+        fp = open("nawab_errors.log", "a")
+        fp.write("No tweet id found, hence assuming no file created and therefore creating the new file \n")
         f = open("tid_store.txt", "w+")
         last_id = None
 
@@ -70,9 +71,10 @@ def nawab_search(api, query):
                         url = 'https://twitter.com/' + user +  '/status/' + str(id)
                         print(url)
 
-                print("Id:" + str(id) + "is stored to the db from this iteration")
+                print("Id: " + str(id) + " is stored to the db from this iteration")
             except tweepy.TweepError as e:
-                print(e.reason)
+                with open("nawab_errors.log", "a") as fp:
+                    fp.write("Tweepy failed at " + str(id) + " because of " + e.reason + "\n")
                 pass
 
 def nawab_retweet_tweet(api):
@@ -83,8 +85,10 @@ def nawab_retweet_tweet(api):
             try:
                 api.retweet(tweet_id)
             except tweepy.TweepError as e:
-                print(e.reason)
+                with open("nawab_errors.log", "a") as fp:
+                    fp.write("Tweepy failed to retweet after reading from the store of id " + str(tweet_id) + " because of " + e.reason + "\n")
                 pass
+
 def main():
    api = nawab_twitter_authenticate()
    nawab_curate_list(api)
