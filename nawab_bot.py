@@ -68,7 +68,8 @@ def nawab_search(api, query):
                     id = tweets.id
 
                     if nawab_check_tweet(id):
-                        print("Already exists in the database")
+                        with open("nawab_errors.log", "a") as fp:
+                            fp.write(str(id) + " already exists in the database\n")
                     else:
                         nawab_store_id(id)
                         url = 'https://twitter.com/' + user +  '/status/' + str(id)
