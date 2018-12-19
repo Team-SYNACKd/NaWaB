@@ -41,7 +41,6 @@ def nawab_check_tweet(tweet_id):
 def nawab_curate_list(api):
     query = nawab_read_list()
     nawab_search(api, query)
-        #time.sleep(60)
 
 def nawab_search(api, query):
     tweet_limit = 1
@@ -90,6 +89,7 @@ def nawab_retweet_tweet(api):
             tweet_id = int(line)
             try:
                 api.retweet(tweet_id)
+                time.sleep(60)
                 
                 with open("nawab_results.log", "a") as fp:
                     fp.write("Nawab retweeted " + str(tweet_id) + " successfully \n")
