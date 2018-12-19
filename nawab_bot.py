@@ -66,9 +66,9 @@ def nawab_search(api, query):
                     user = tweets.user.screen_name
                     id = tweets.id
 
-                    if nawab_check_tweet(id):
+                    if (nawab_check_tweet(id)) and ('RT @' in tweets.text):
                         with open("nawab_errors.log", "a") as fp:
-                            fp.write(str(id) + " already exists in the database\n")
+                            fp.write(str(id) + " already exists in the database or it is a retweet\n")
                     else:
                         nawab_store_id(id)
                         url = 'https://twitter.com/' + user +  '/status/' + str(id)
