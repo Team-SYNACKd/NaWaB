@@ -57,7 +57,10 @@ def nawab_search(api, query):
 
     if len(query) > 0:
         for line in query:
-            print("starting new query search: \t" + line)
+            
+            with open("nawab_results.log", "a") as fp:
+                fp.write("starting new query search: \t" + line + "\n")
+
             try:
                 for tweets in tweepy.Cursor(api.search, q=line, tweet_mode="extended", 
                         lang='en', since=latest_date).items(tweet_limit):
@@ -69,9 +72,12 @@ def nawab_search(api, query):
                     else:
                         nawab_store_id(id)
                         url = 'https://twitter.com/' + user +  '/status/' + str(id)
-                        print(url)
+                        with open("nawab_results.log", "a") as fp:
+                            fp.write(url)
 
-                print("Id: " + str(id) + " is stored to the db from this iteration")
+                with open("nawab_results.log", "a") as fp:
+                    fp.write("Id: " + str(id) + " is stored to the db from this iteration \n")
+
             except tweepy.TweepError as e:
                 with open("nawab_errors.log", "a") as fp:
                     fp.write("Tweepy failed at " + str(id) + " because of " + e.reason + "\n")
@@ -81,9 +87,12 @@ def nawab_retweet_tweet(api):
     with open("tid_store.txt", "r") as fp:
         for line in fp:
             tweet_id = int(line)
-            print(tweet_id)
             try:
                 api.retweet(tweet_id)
+                
+                with open("nawab_results.log", "a") as fp:
+                    fp.write("Nawab retweeted " + str(tweet_id) + " successfully \n")
+
             except tweepy.TweepError as e:
                 with open("nawab_errors.log", "a") as fp:
                     fp.write("Tweepy failed to retweet after reading from the store of id " + str(tweet_id) + " because of " + e.reason + "\n")
