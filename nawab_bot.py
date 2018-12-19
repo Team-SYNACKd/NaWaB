@@ -6,6 +6,7 @@ import tweepy
 import mmap
 import time
 import random
+from datetime import date
 
 def nawab_twitter_authenticate():
     auth = tweepy.OAuthHandler(config.consumer_key, config.consumer_secret)
@@ -44,7 +45,8 @@ def nawab_curate_list(api):
 
 def nawab_search(api, query):
     tweet_limit = 1
-    
+    latest_date = date.today()
+
     try:
         last_id = nawab_get_id()
     except FileNotFoundError as e:
@@ -57,7 +59,7 @@ def nawab_search(api, query):
             print("starting new query search: \t" + line)
             try:
                 for tweets in tweepy.Cursor(api.search, q=line, tweet_mode="extended", 
-                        lang='en',).items(tweet_limit):
+                        lang='en', since=latest_date).items(tweet_limit):
                     user = tweets.user.screen_name
                     id = tweets.id
 
