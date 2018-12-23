@@ -31,6 +31,13 @@ def nawab_get_blacklist():
             if "#DO_NOT_REMOVE_THIS_LINE#" not in str(line):
                 banned_accs.append(line.strip())
 
+def nawab_get_bannedwords():
+    banned_words = []
+    with open("banwords.txt", "r") as fp:
+        for line in fp:
+            if "#DO_NOT_REMOVE_THIS_LINE#" not in str(line):
+                banned_words.append(line.strip())
+
 def nawab_get_id():
     ### Read the last retweeted id from a file
     with open("tid_store.txt", "r") as fp:
