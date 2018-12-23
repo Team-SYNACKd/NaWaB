@@ -92,15 +92,17 @@ def nawab_search(api, query):
                         lang='en', since=latest_date).items(tweet_limit):
                     user = tweets.user.screen_name
                     id = tweets.id
+                    text = tweets.full_text
 
                     if (nawab_check_tweet(id)) and ('RT @' in tweets.text):
                         with open("nawab_errors.log", "a") as fp:
                             fp.write(str(id) + " already exists in the database or it is a retweet\n")
                     else:
-                        nawab_store_id(id)
-                        url = 'https://twitter.com/' + user +  '/status/' + str(id)
-                        with open("nawab_results.log", "a") as fp:
-                            fp.write(url)
+                        if (isUserBanned(user) and isSafeKeyword(text)):
+                            nawab_store_id(id)
+                            url = 'https://twitter.com/' + user +  '/status/' + str(id)
+                            with open("nawab_results.log", "a") as fp:
+                                fp.write(url)
 
                 with open("nawab_results.log", "a") as fp:
                     fp.write("Id: " + str(id) + " is stored to the db from this iteration \n")
