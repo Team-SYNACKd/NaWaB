@@ -8,6 +8,10 @@ import time
 import random
 from datetime import date
 
+# Banned handles and words
+banned_accs =  []
+banned_words = []
+
 def nawab_twitter_authenticate():
     auth = tweepy.OAuthHandler(config.consumer_key, config.consumer_secret)
     auth.set_access_token(config.access_token_key, config.access_token_secret)
@@ -25,18 +29,27 @@ def nawab_store_id(tweet_id):
         fp.write(str(tweet_id) + str('\n'))
 
 def nawab_get_blacklist():
-    banned_accs =  []
     with open("blacklist.txt", "r") as fp:
         for line in fp:
             if "#DO_NOT_REMOVE_THIS_LINE#" not in str(line):
                 banned_accs.append(line.strip())
 
 def nawab_get_bannedwords():
-    banned_words = []
     with open("banwords.txt", "r") as fp:
         for line in fp:
             if "#DO_NOT_REMOVE_THIS_LINE#" not in str(line):
                 banned_words.append(line.strip())
+
+def isUserBanned(userName):
+    if not any(acc == userName.lower() for acc in banned_accs):
+        return True
+    return False
+
+"""Get banned words for a safer content tweets by nawab"""
+def isSafeKeyword(tweetText):
+    if not any(word in tweetText.lower() for word in banned_words):
+        return True
+    return False
 
 def nawab_get_id():
     ### Read the last retweeted id from a file
