@@ -24,6 +24,13 @@ def nawab_store_id(tweet_id):
     with open("tid_store.txt","a") as fp:
         fp.write(str(tweet_id) + str('\n'))
 
+def nawab_get_blacklist():
+    banned_accs =  []
+    with open("blacklist.txt", "r") as fp:
+        for line in fp:
+            if "#DO_NOT_REMOVE_THIS_LINE#" not in str(line):
+                banned_accs.append(line.strip())
+
 def nawab_get_id():
     ### Read the last retweeted id from a file
     with open("tid_store.txt", "r") as fp:
