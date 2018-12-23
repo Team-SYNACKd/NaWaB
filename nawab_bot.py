@@ -11,6 +11,7 @@ from datetime import date
 # Banned handles and words
 banned_accs =  []
 banned_words = []
+whitelist_accs = []
 
 def nawab_twitter_authenticate():
     auth = tweepy.OAuthHandler(config.consumer_key, config.consumer_secret)
@@ -39,6 +40,17 @@ def nawab_get_bannedwords():
         for line in fp:
             if "#DO_NOT_REMOVE_THIS_LINE#" not in str(line):
                 banned_words.append(line.strip())
+
+def nawab_get_whitelist():
+    with open("whitelist.txt", "r") as fp:
+        for line in fp:
+            if "#DO_NOT_REMOVE_THIS_LINE#" not in str(line):
+                whitelist_accs.append(line.strip())
+
+def isUserwhitelisted(userName):
+    if not any(acc == userName.lower() for acc in whitelist_accs):
+        return True
+    return False
 
 def isUserBanned(userName):
     if not any(acc == userName.lower() for acc in banned_accs):
@@ -98,7 +110,7 @@ def nawab_search(api, query):
                         with open("nawab_errors.log", "a") as fp:
                             fp.write(str(id) + " already exists in the database or it is a retweet\n")
                     else:
-                        if (isUserBanned(user) and isSafeKeyword(text)):
+                        if (isUserwhitelisted(user) or (isUserBanned(user) and isSafeKeyword(text))):
                             nawab_store_id(id)
                             url = 'https://twitter.com/' + user +  '/status/' + str(id)
                             with open("nawab_results.log", "a") as fp:
@@ -130,6 +142,9 @@ def nawab_retweet_tweet(api):
 
 def main():
    api = nawab_twitter_authenticate()
+   nawab_get_blacklist()
+   nawab_get_bannedwords()
+   nawab_get_whitelist()
    nawab_curate_list(api)
    nawab_retweet_tweet(api)
 
