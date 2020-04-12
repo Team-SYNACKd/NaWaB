@@ -7,11 +7,14 @@ import mmap
 import time
 import random
 from datetime import date
+import pandas as pd
 
 # Banned handles and words
 banned_accs =  []
 banned_words = []
 whitelist_accs = []
+
+data = pd.read_csv('data.csv')
 
 def nawab_twitter_authenticate():
     auth = tweepy.OAuthHandler(config.consumer_key, config.consumer_secret)
