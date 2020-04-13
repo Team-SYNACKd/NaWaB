@@ -7,6 +7,8 @@ import mmap
 import time
 import random
 from datetime import date
+import tg_config as tg
+import telegram
 
 # Banned handles and words
 banned_accs =  []
@@ -129,11 +131,17 @@ def nawab_retweet_tweet(api):
         for line in fp:
             tweet_id = int(line)
             try:
+                u = api.get_status(id=tweet_id)
+                rt_username = u.author.screen_name
                 api.retweet(tweet_id)
                 time.sleep(60)
-                
+                retweet_url = 'https://twitter.com/' + rt_username +  '/status/' + str(tweet_id)
+                                
                 with open("nawab_results.log", "a") as fp:
                     fp.write("Nawab retweeted " + str(tweet_id) + " successfully \n")
+                
+                bot = telegram.Bot(token=tg.token)
+                bot.sendMessage(chat_id=tg.chat_id, text=retweet_url)
 
             except tweepy.TweepError as e:
                 with open("nawab_errors.log", "a") as fp:
