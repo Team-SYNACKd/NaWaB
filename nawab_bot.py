@@ -6,12 +6,14 @@ import tweepy
 import mmap
 import time
 import random
+import pandas as pd
 from datetime import date
 
 # Banned handles and words
 banned_accs =  []
 banned_words = []
 whitelist_accs = []
+data = pd.read_csv('data.csv')
 
 def nawab_twitter_authenticate():
     auth = tweepy.OAuthHandler(config.consumer_key, config.consumer_secret)
@@ -70,12 +72,11 @@ def nawab_get_id():
             return line
 
 def nawab_check_tweet(tweet_id):
-    with open("tid_store.txt", "r") as fp:
-        for line in fp:
-            if line == tweet_id:
-                return True
-            else:
-                return False
+    ser = data.Series(data['id'])
+    for i in ser:
+        if i == tweet_id:
+            return True
+    return False
 
 def nawab_curate_list(api):
     query = nawab_read_list()
