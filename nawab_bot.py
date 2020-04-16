@@ -6,9 +6,12 @@ import tweepy
 import mmap
 import time
 import random
+import pandas as pd
 from datetime import date
 import pandas as pd
 import csv
+import argparse
+import os
 
 
 data = pd.read_csv('data.csv')
@@ -150,9 +153,21 @@ def nawab_retweet_tweet(api):
 
 
 def main():
-   api = nawab_twitter_authenticate()
-   nawab_curate_list(api)
-   nawab_retweet_tweet(api)
+    # initialise the parser
+    parser = argparse.ArgumentParser(
+        description="Provide name of file and path"
+    )
+    
+    # add arguments
+    parser.add_argument('file',type=str, 
+                         help="Provide the file name")
+    parser.add_argument('path', type=str 
+                       , help= ' path to desired directory',required=True)
+    args = parser.parse_args()
+    os.chdir(args.path)
+    api = nawab_twitter_authenticate()
+    nawab_curate_list(api)
+    nawab_retweet_tweet(api)
 
 
 if __name__ == "__main__":
