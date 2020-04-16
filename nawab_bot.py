@@ -6,11 +6,14 @@ import tweepy
 import mmap
 import time
 import random
+import pandas as pd
 from datetime import date
 import pandas as pd
 import csv
 import os
 import pwd
+import argparse
+
 
 
 def nawab_twitter_authenticate():
@@ -153,6 +156,17 @@ def nawab_retweet_tweet(api, dirpath):
 def main():
     data = pd.read_csv('data.csv')
     default_dir = '/var/log/nawab/'
+    
+    ##initialise parser
+    parser = argparse.ArgumentParser(
+        description="Provide the path for the logs to be stored."
+    )
+    parser.add_argument('--path', type=str
+                        , help= 'enter path to new logs location' )
+    
+    args = vars(parser.parse_args())
+    if(args['path']):
+        default_dir = str(args['path'])
 
     u_id = pwd.getpwuid( os.getuid() ).pw_name
 
