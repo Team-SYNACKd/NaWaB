@@ -6,12 +6,19 @@ import tweepy
 import mmap
 import time
 import random
+import pandas as pd
 from datetime import date
+import tg_config as tg
+import telegram
+import csv
 
 # Banned handles and words
 banned_accs =  []
 banned_words = []
 whitelist_accs = []
+
+data = pd.read_csv("data.csv")
+tid = pd.read_csv("tid_store.csv")
 
 def nawab_twitter_authenticate():
     auth = tweepy.OAuthHandler(config.consumer_key, config.consumer_secret)
@@ -20,32 +27,33 @@ def nawab_twitter_authenticate():
     return api
 
 def nawab_read_list():
-    proto_list = open('protobuf_list.txt', 'r')
-    search_term = proto_list.readlines()
+    proto_list = pd.Series(data['Proto_list'])
+    search_term = list(proto_list)
     return search_term
 
 def nawab_store_id(tweet_id):
     ### Store a tweet id in a file
-    with open("tid_store.txt","a") as fp:
-        fp.write(str(tweet_id) + str('\n'))
-
+    with open("tid_store.csv","a") as fp:
+        append=csv.writer(fp)
+        append.writerow(str(tweet_id))
+        
 def nawab_get_blacklist():
-    with open("blacklist.txt", "r") as fp:
-        for line in fp:
-            if "#DO_NOT_REMOVE_THIS_LINE#" not in str(line):
-                banned_accs.append(line.strip())
+    ser = pd.Series(data['Blacklist'])
+    for line in ser:
+        if "#DO_NOT_REMOVE_THIS_LINE#" not in str(line):
+            banned_accs.append(line.strip())
 
 def nawab_get_bannedwords():
-    with open("banwords.txt", "r") as fp:
-        for line in fp:
-            if "#DO_NOT_REMOVE_THIS_LINE#" not in str(line):
-                banned_words.append(line.strip())
+    ser = pd.Series(data['Banwords'])
+    for line in ser:
+        if "#DO_NOT_REMOVE_THIS_LINE#" not in str(line):
+            banned_words.append(line.strip())
 
 def nawab_get_whitelist():
-    with open("whitelist.txt", "r") as fp:
-        for line in fp:
-            if "#DO_NOT_REMOVE_THIS_LINE#" not in str(line):
-                whitelist_accs.append(line.strip())
+     ser = pd.Series(data['Whitelist'])
+     for line in ser:
+        if "#DO_NOT_REMOVE_THIS_LINE#" not in str(line):
+            whitelist_accs.append(line.strip())
 
 def isUserwhitelisted(userName):
     if not any(acc == userName.lower() for acc in whitelist_accs):
@@ -65,18 +73,17 @@ def isSafeKeyword(tweetText):
 
 def nawab_get_id():
     ### Read the last retweeted id from a file
-    with open("tid_store.txt", "r") as fp:
-        for line in fp:
-            return line
-
+    ser = pd.Series(tid['id'])
+    for line in ser:
+        return line
+        
 def nawab_check_tweet(tweet_id):
-    with open("tid_store.txt", "r") as fp:
-        for line in fp:
-            if line == tweet_id:
-                return True
-            else:
-                return False
-
+    ser = pd.Series(tid['id'])
+    for i in ser:
+        if i == tweet_id:
+            return True
+    return False
+    
 def nawab_curate_list(api):
     query = nawab_read_list()
     nawab_search(api, query)
@@ -129,11 +136,17 @@ def nawab_retweet_tweet(api):
         for line in fp:
             tweet_id = int(line)
             try:
-                api.retweet(tweet_id)
+                u = api.get_status(id=tweet_id)
+                rt_username = u.author.screen_name
+                ##api.retweet(tweet_id)
                 time.sleep(60)
+                
+                retweet_url = 'https://twitter.com/' + rt_username +  '/status/' + str(tweet_id)
                 
                 with open("nawab_results.log", "a") as fp:
                     fp.write("Nawab retweeted " + str(tweet_id) + " successfully \n")
+                bot = telegram.Bot(token=tg.token)
+                bot.sendMessage(chat_id=tg.chat_id, text=retweet_url)
 
             except tweepy.TweepError as e:
                 with open("nawab_errors.log", "a") as fp:
