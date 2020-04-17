@@ -35,25 +35,26 @@ def nawab_store_id(tweet_id):
     ### Store a tweet id in a file
     with open("tid_store.csv","a") as fp:
         append=csv.writer(fp)
-        append.writerow(str(tweet_id))
+        store_list = ['',tweet_id]
+        append.writerow(store_list)
         
 def nawab_get_blacklist():
     ser = pd.Series(data['Blacklist'])
     for line in ser:
         if "#DO_NOT_REMOVE_THIS_LINE#" not in str(line):
-            banned_accs.append(line.strip())
+            banned_accs.append(line)
 
 def nawab_get_bannedwords():
     ser = pd.Series(data['Banwords'])
     for line in ser:
         if "#DO_NOT_REMOVE_THIS_LINE#" not in str(line):
-            banned_words.append(line.strip())
+            banned_words.append(line)
 
 def nawab_get_whitelist():
      ser = pd.Series(data['Whitelist'])
      for line in ser:
         if "#DO_NOT_REMOVE_THIS_LINE#" not in str(line):
-            whitelist_accs.append(line.strip())
+            whitelist_accs.append(line)
 
 def isUserwhitelisted(userName):
     if not any(acc == userName.lower() for acc in whitelist_accs):
@@ -132,26 +133,26 @@ def nawab_search(api, query):
                 pass
 
 def nawab_retweet_tweet(api):
-    with open("tid_store.txt", "r") as fp:
-        for line in fp:
-            tweet_id = int(line)
-            try:
-                u = api.get_status(id=tweet_id)
-                rt_username = u.author.screen_name
-                ##api.retweet(tweet_id)
-                time.sleep(60)
-                
-                retweet_url = 'https://twitter.com/' + rt_username +  '/status/' + str(tweet_id)
-                
-                with open("nawab_results.log", "a") as fp:
-                    fp.write("Nawab retweeted " + str(tweet_id) + " successfully \n")
-                bot = telegram.Bot(token=tg.token)
-                bot.sendMessage(chat_id=tg.chat_id, text=retweet_url)
+    ser = pd.Series(tid['id'])
+    for line in ser:
+        tweet_id = int(line)
+        try:
+            u = api.get_status(id=tweet_id)
+            rt_username = u.author.screen_name
+            ##api.retweet(tweet_id)
+            time.sleep(60)
+            
+            retweet_url = 'https://twitter.com/' + rt_username +  '/status/' + str(tweet_id)
+            
+            with open("nawab_results.log", "a") as fp:
+                fp.write("Nawab retweeted " + str(tweet_id) + " successfully \n")
+            bot = telegram.Bot(token=tg.token)
+            bot.sendMessage(chat_id=tg.chat_id, text=retweet_url)
 
-            except tweepy.TweepError as e:
-                with open("nawab_errors.log", "a") as fp:
-                    fp.write("Tweepy failed to retweet after reading from the store of id " + str(tweet_id) + " because of " + e.reason + "\n")
-                pass
+        except tweepy.TweepError as e:
+            with open("nawab_errors.log", "a") as fp:
+                fp.write("Tweepy failed to retweet after reading from the store of id " + str(tweet_id) + " because of " + e.reason + "\n")
+            pass
 
 def main():
    api = nawab_twitter_authenticate()
