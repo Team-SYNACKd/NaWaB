@@ -12,6 +12,8 @@ import tg_config as tg
 import telegram
 import csv
 
+
+
 # Banned handles and words
 banned_accs =  []
 banned_words = []
@@ -19,6 +21,8 @@ whitelist_accs = []
 
 data = pd.read_csv("data.csv")
 tid = pd.read_csv("tid_store.csv")
+
+
 
 def nawab_twitter_authenticate():
     auth = tweepy.OAuthHandler(config.consumer_key, config.consumer_secret)
