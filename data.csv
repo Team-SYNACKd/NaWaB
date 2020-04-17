@@ -1,10 +1,10 @@
-Whitelist,Proto_list,Blacklist,Banwords,id
-Cloudflare,#netsec,Pornhub,porn,1249218563145191424
-internet_nl,#DNS,xnxx,pornhub,1249317243881771009
-powerdns,#DANE,,xvideos,1249261732712726528
-,#DNSSEC,,sex,1249248414921101312
-,#QUIC,,,1249316072936706049
-,#TCP/UDP,,,1249299294168875009
+Whitelist,Proto_list,Blacklist,Banwords
+Cloudflare,#netsec,Pornhub,porn
+internet_nl,#DNS,xnxx,pornhub
+powerdns,#DANE,,xvideos
+,#DNSSEC,,sex
+,#QUIC,,,
+,#TCP/UDP,,,
 ,#BGP,,
 ,#Routing,, 
 ,#IP,,
