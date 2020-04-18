@@ -8,6 +8,7 @@ import time
 import random
 from datetime import date
 import pandas as pd
+import csv
 
 # Banned handles and words
 banned_accs =  []
@@ -23,9 +24,11 @@ def nawab_twitter_authenticate():
     return api
 
 def nawab_read_list():
-    proto_list = open('protobuf_list.txt', 'r')
-    search_term = proto_list.readlines()
-    return search_term
+    search_list = []
+    for index, row in data.iterrows(): 
+        search_list.append(row["Proto_list"])
+    return (search_list)
+    
 
 def nawab_store_id(tweet_id):
     ### Store a tweet id in a file
@@ -33,23 +36,17 @@ def nawab_store_id(tweet_id):
         fp.write(str(tweet_id) + str('\n'))
 
 def nawab_get_blacklist():
-    with open("blacklist.txt", "r") as fp:
-        for line in fp:
-            if "#DO_NOT_REMOVE_THIS_LINE#" not in str(line):
-                banned_accs.append(line.strip())
-
+    for index, line in data.iterrows():
+        banned_accs.append(line["Blacklist"])
+        
 def nawab_get_bannedwords():
-    with open("banwords.txt", "r") as fp:
-        for line in fp:
-            if "#DO_NOT_REMOVE_THIS_LINE#" not in str(line):
-                banned_words.append(line.strip())
+    for index, line in data.iterrows():
+        banned_words.append(line["Banwords"])
 
 def nawab_get_whitelist():
-    with open("whitelist.txt", "r") as fp:
-        for line in fp:
-            if "#DO_NOT_REMOVE_THIS_LINE#" not in str(line):
-                whitelist_accs.append(line.strip())
-
+    for index, line in data.iterrows():
+        whitelist_accs.append(line["Whitelist"])
+        
 def isUserwhitelisted(userName):
     if not any(acc == userName.lower() for acc in whitelist_accs):
         return True

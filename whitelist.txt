@@ -1,4 +1,0 @@
-#DO_NOT_REMOVE_THIS_LINE# below type all the whitelist accounts usernames, seperate each with a new line(press enter after each username) sample:
-Cloudflare
-internet_nl
-powerdns
