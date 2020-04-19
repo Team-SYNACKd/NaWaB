@@ -40,7 +40,7 @@ $ python3 nawab_bot.py
 
 ## Developers 
 1. [Aniketh Girish](https://github.com/Aniketh01/)
-2. [K N Anantha nandanan](https://github.com/ananthanandanan)
+2. [Ananthanandanan](https://github.com/ananthanandanan)
 3. [Akshay Praveen Nair](https://github.com/iammarco11/)
 
 ## Want to contribute?
