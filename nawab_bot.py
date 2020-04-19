@@ -10,10 +10,6 @@ from datetime import date
 import pandas as pd
 import csv
 
-# Banned handles and words
-banned_accs = []
-banned_words = []
-whitelist_accs = []
 
 data = pd.read_csv('data.csv')
 
@@ -38,29 +34,16 @@ def nawab_store_id(tweet_id):
         fp.write(str(tweet_id) + str('\n'))
 
 
-def nawab_get_blacklist():
-    for index, line in data.iterrows():
-        banned_accs.append(line["Blacklist"])
-
-
-def nawab_get_bannedwords():
-    for index, line in data.iterrows():
-        banned_words.append(line["Banwords"])
-
-
-def nawab_get_whitelist():
-    for index, line in data.iterrows():
-        whitelist_accs.append(line["Whitelist"])
-
-
 def isUserwhitelisted(userName):
-    if not any(acc == userName.lower() for acc in whitelist_accs):
+    ### Search if the Whitelist user is in file
+    if not any(acc["Whitelist"] == userName.lower() for index, acc in data.iterrows()):
         return True
     return False
 
 
 def isUserBanned(userName):
-    if not any(acc == userName.lower() for acc in banned_accs):
+    ### Search if the Blacklisted user is in file
+    if not any(acc["Blacklist"] == userName.lower() for index, acc in data.iterrows()):
         return True
     return False
 
@@ -69,7 +52,8 @@ def isUserBanned(userName):
 
 
 def isSafeKeyword(tweetText):
-    if not any(word in tweetText.lower() for word in banned_words):
+    ### Search if tweettext is safe
+    if not any(word["Banwords"] == tweetText.lower() for index, word in data.iterrows()):
         return True
     return False
 
@@ -165,9 +149,6 @@ def nawab_retweet_tweet(api):
 
 def main():
    api = nawab_twitter_authenticate()
-   nawab_get_blacklist()
-   nawab_get_bannedwords()
-   nawab_get_whitelist()
    nawab_curate_list(api)
    nawab_retweet_tweet(api)
 
