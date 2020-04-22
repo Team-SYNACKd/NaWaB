@@ -153,16 +153,23 @@ def nawab_retweet_tweet(api):
 
 
 def main():
+    
+    # default directory
+    def_dir = 'var/log'
+    if not os.path.exists(def_dir):
+        os.makedirs(def_dir)
+        os.chdir(def_dir)
     # initialise the parser
     parser = argparse.ArgumentParser(
         description="Provide  path for logs destination"
     )
-    
     # add argument to provide path 
-    parser.add_argument('path', type=str 
+    parser.add_argument('--path', type=str 
                        , help= ' path to destination directory')
     args = vars(parser.parse_args())
-    os.chdir(args['path'])
+    ## To check if new_path is passed
+    if(args['path']):
+        os.chdir(args['path'])
     api = nawab_twitter_authenticate()
     nawab_curate_list(api)
     nawab_retweet_tweet(api)
