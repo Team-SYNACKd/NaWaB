@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 def start(update, context):
     with open("tid_store.txt", "r") as fp:
         for line in fp:
-            keyboard = [InlineKeyboardButton("Retweet", callback_data=line)]
+            keyboard = [[InlineKeyboardButton("Retweet", callback_data=int(line))]]
             reply_markup = InlineKeyboardMarkup(keyboard)
             update.message.reply_text('Tweet' + str(line), reply_markup = reply_markup)
 
@@ -28,10 +28,6 @@ def button(update, context):
     query.edit_message_text(text="Selected option: {}".format(query.data))
 
 
-def help(update, context):
-    update.message.reply_text("Use /start to test this bot.")
-
-
 def error(update, context):
     """Log Errors caused by Updates."""
     logger.warning('Update "%s" caused error "%s"', update, context.error)
@@ -41,7 +37,7 @@ def main():
     updater = Updater(token = tg.token, use_context = True)
 
     updater.dispatcher.add_handler(CommandHandler('start', start))
-    #updater.dispatcher.add_handler(CallbackQueryHandler(button))
+    updater.dispatcher.add_handler(CallbackQueryHandler(button))
     updater.dispatcher.add_error_handler(error)
 
     # Start the Bot
