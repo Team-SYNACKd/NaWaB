@@ -155,16 +155,14 @@ def nawab_retweet_tweet(api):
 def main():
     # initialise the parser
     parser = argparse.ArgumentParser(
-        description="Provide name of file and path"
+        description="Provide  path for logs destination"
     )
     
-    # add arguments
-    parser.add_argument('file',type=str, 
-                         help="Provide the file name")
+    # add argument to provide path 
     parser.add_argument('path', type=str 
-                       , help= ' path to desired directory',required=True)
-    args = parser.parse_args()
-    os.chdir(args.path)
+                       , help= ' path to destination directory')
+    args = vars(parser.parse_args())
+    os.chdir(args['path'])
     api = nawab_twitter_authenticate()
     nawab_curate_list(api)
     nawab_retweet_tweet(api)
