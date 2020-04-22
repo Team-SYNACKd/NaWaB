@@ -29,8 +29,14 @@ def start(update, context):
     api = tweepy.API(auth)
     with open("tid_store.txt", "r") as fp:
         for line in fp:
-            u = api.get_status(id=line)
-            username = u.author.screen_name
+            try:
+                u = api.get_status(id=line)
+                username = u.author.screen_name
+            except tweepy.TweepError as e:
+                with open("tg_errors.log", "a") as fp:
+                    fp.write("Tweepy failed to get the status of the user from the " +
+                             str(line) + " because of " + e.reason + "\n")
+                pass
             url = 'https://twitter.com/' + username +  '/status/' + str(line)
             keyboard = [[InlineKeyboardButton("Retweet", callback_data=int(line))]]
             reply_markup = InlineKeyboardMarkup(keyboard)
@@ -46,7 +52,13 @@ def button(update, context):
     # Some clients may have trouble otherwise. See https://core.telegram.org/bots/api#callbackquery
     query.answer()
     data = query.data
-    api.retweet(data)
+    try:
+        api.retweet(data)
+    except tweepy.TweepError as e:
+        with open("tg_errors.log", "a") as fp:
+            fp.write("Tweepy failed to retweet after reading from the store of id " +
+                        str(data) + " because of " + e.reason + "\n")
+        pass
     query.edit_message_text(text="Retweeted: {}".format(query.data))
 
 
