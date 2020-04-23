@@ -14,19 +14,12 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
                     level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-"""
-def nawab_twitter_authenticate():
-    auth = tweepy.OAuthHandler(config.consumer_key, config.consumer_secret)
-    auth.set_access_token(config.access_token_key, config.access_token_secret)
-    api = tweepy.API(auth)
-    return api
-"""
+auth = tweepy.OAuthHandler(config.consumer_key, config.consumer_secret)
+auth.set_access_token(config.access_token_key, config.access_token_secret)
+api = tweepy.API(auth)
 
 
 def start(update, context):
-    auth = tweepy.OAuthHandler(config.consumer_key, config.consumer_secret)
-    auth.set_access_token(config.access_token_key, config.access_token_secret)
-    api = tweepy.API(auth)
     with open("tid_store.txt", "r") as fp:
         for line in fp:
             try:
@@ -45,9 +38,6 @@ def start(update, context):
 
 def button(update, context):
     query = update.callback_query
-    auth = tweepy.OAuthHandler(config.consumer_key, config.consumer_secret)
-    auth.set_access_token(config.access_token_key, config.access_token_secret)
-    api = tweepy.API(auth)
     # CallbackQueries need to be answered, even if no notification to the user is needed
     # Some clients may have trouble otherwise. See https://core.telegram.org/bots/api#callbackquery
     query.answer()
@@ -80,7 +70,6 @@ def main():
     # Run the bot until the user presses Ctrl-C or the process receives SIGINT,
     # SIGTERM or SIGABRT
     updater.idle()
-
 
 if __name__ == '__main__':
     main()
