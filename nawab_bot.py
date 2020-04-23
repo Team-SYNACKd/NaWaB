@@ -11,9 +11,6 @@ import pandas as pd
 import csv
 
 
-data = pd.read_csv('data.csv')
-
-
 def nawab_twitter_authenticate():
     auth = tweepy.OAuthHandler(config.consumer_key, config.consumer_secret)
     auth.set_access_token(config.access_token_key, config.access_token_secret)
@@ -21,7 +18,7 @@ def nawab_twitter_authenticate():
     return api
 
 
-def nawab_read_list():
+def nawab_read_list(data):
     search_list = []
     for index, row in data.iterrows():
         search_list.append(row["Proto_list"])
@@ -34,14 +31,14 @@ def nawab_store_id(tweet_id):
         fp.write(str(tweet_id) + str('\n'))
 
 
-def isUserwhitelisted(userName):
+def isUserwhitelisted(userName, data):
     ### Search if the Whitelist user is in file
     if not any(acc["Whitelist"] == userName.lower() for index, acc in data.iterrows()):
         return True
     return False
 
 
-def isUserBanned(userName):
+def isUserBanned(userName, data):
     ### Search if the Blacklisted user is in file
     if not any(acc["Blacklist"] == userName.lower() for index, acc in data.iterrows()):
         return True
@@ -51,7 +48,7 @@ def isUserBanned(userName):
 """Get banned words for a safer content tweets by nawab"""
 
 
-def isSafeKeyword(tweetText):
+def isSafeKeyword(tweetText, data):
     ### Search if tweettext is safe
     if not any(word["Banwords"] == tweetText.lower() for index, word in data.iterrows()):
         return True
@@ -74,12 +71,12 @@ def nawab_check_tweet(tweet_id):
                 return False
 
 
-def nawab_curate_list(api):
-    query = nawab_read_list()
-    nawab_search(api, query)
+def nawab_curate_list(api, data):
+    query = nawab_read_list(data)
+    nawab_search(api, data, query)
 
 
-def nawab_search(api, query):
+def nawab_search(api, data, query):
     tweet_limit = 1
     latest_date = date.today()
 
@@ -110,7 +107,7 @@ def nawab_search(api, query):
                             fp.write(
                                 str(id) + " already exists in the database or it is a retweet\n")
                     else:
-                        if (isUserwhitelisted(user) or (isUserBanned(user) and isSafeKeyword(text))):
+                        if (isUserwhitelisted(user, data) or (isUserBanned(user, data) and isSafeKeyword(text, data))):
                             nawab_store_id(id)
                             url = 'https://twitter.com/' + \
                                 user + '/status/' + str(id)
@@ -152,8 +149,10 @@ def nawab_retweet_tweet(api):
 
 
 def main():
+    data = pd.read_csv('data.csv')
+
     api = nawab_twitter_authenticate()
-    nawab_curate_list(api)
+    nawab_curate_list(api, data)
     nawab_retweet_tweet(api)
 
 
