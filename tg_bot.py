@@ -4,6 +4,8 @@ import config
 import tweepy
 import tg_config as tg
 import time
+import os
+import pwd
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler
@@ -18,15 +20,24 @@ auth = tweepy.OAuthHandler(config.consumer_key, config.consumer_secret)
 auth.set_access_token(config.access_token_key, config.access_token_secret)
 api = tweepy.API(auth)
 
+default_dir = '/var/log/nawab/'
+
+u_id = pwd.getpwuid( os.getuid() ).pw_name
+
+if not os.path.exists(default_dir):
+    os.system(("sudo mkdir %s" % (default_dir)))
+
+ownership_command = "sudo chown %s: %s" % (u_id, default_dir)
+os.system(ownership_command)
 
 def start(update, context):
-    with open("tid_store.txt", "r") as fp:
+    with open(default_dir + "tid_store.txt", "r") as fp:
         for line in fp:
             try:
                 u = api.get_status(id=line)
                 username = u.author.screen_name
             except tweepy.TweepError as e:
-                with open("tg_errors.log", "a") as fp:
+                with open(default_dir + "tg_errors.log", "a") as fp:
                     fp.write("Tweepy failed to get the status of the user from the " +
                              str(line) + " because of " + e.reason + "\n")
                 pass
@@ -45,7 +56,7 @@ def button(update, context):
     try:
         api.retweet(data)
     except tweepy.TweepError as e:
-        with open("tg_errors.log", "a") as fp:
+        with open(default_dir + "tg_errors.log", "a") as fp:
             fp.write("Tweepy failed to retweet after reading from the store of id " +
                         str(data) + " because of " + e.reason + "\n")
         pass
