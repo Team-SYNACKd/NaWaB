@@ -9,6 +9,8 @@ import random
 from datetime import date
 import pandas as pd
 import csv
+import os
+import pwd
 
 
 def nawab_twitter_authenticate():
@@ -25,9 +27,9 @@ def nawab_read_list(data):
     return (search_list)
 
 
-def nawab_store_id(tweet_id):
+def nawab_store_id(tweet_id, dirpath):
     ### Store a tweet id in a file
-    with open("tid_store.txt", "a") as fp:
+    with open(dirpath + "tid_store.txt", "a") as fp:
         fp.write(str(tweet_id) + str('\n'))
 
 
@@ -55,15 +57,15 @@ def isSafeKeyword(tweetText, data):
     return False
 
 
-def nawab_get_id():
+def nawab_get_id(dirpath):
     ### Read the last retweeted id from a file
-    with open("tid_store.txt", "r") as fp:
+    with open(dirpath + "tid_store.txt", "r") as fp:
         for line in fp:
             return line
 
 
-def nawab_check_tweet(tweet_id):
-    with open("tid_store.txt", "r") as fp:
+def nawab_check_tweet(tweet_id, dirpath):
+    with open(dirpath + "tid_store.txt", "r") as fp:
         for line in fp:
             if line == tweet_id:
                 return True
@@ -71,28 +73,28 @@ def nawab_check_tweet(tweet_id):
                 return False
 
 
-def nawab_curate_list(api, data):
+def nawab_curate_list(api, data, dirpath):
     query = nawab_read_list(data)
-    nawab_search(api, data, query)
+    nawab_search(api, data, query, dirpath)
 
 
-def nawab_search(api, data, query):
+def nawab_search(api, data, query, dirpath):
     tweet_limit = 1
     latest_date = date.today()
 
     try:
-        last_id = nawab_get_id()
+        last_id = nawab_get_id(dirpath)
     except FileNotFoundError as e:
-        fp = open("nawab_errors.log", "a")
+        fp = open(dirpath + "error.log", "a")
         fp.write(
             "No tweet id found, hence assuming no file created and therefore creating the new file \n")
-        f = open("tid_store.txt", "w+")
+        f = open(dirpath + "tid_store.txt", "w+")
         last_id = None
 
     if len(query) > 0:
         for line in query:
 
-            with open("nawab_results.log", "a") as fp:
+            with open(dirpath + "results.log", "a") as fp:
                 fp.write("starting new query search: \t" + line + "\n")
 
             try:
@@ -102,31 +104,31 @@ def nawab_search(api, data, query):
                     id = tweets.id
                     text = tweets.full_text
 
-                    if (nawab_check_tweet(id)) and ('RT @' in tweets.text):
-                        with open("nawab_errors.log", "a") as fp:
+                    if (nawab_check_tweet(id, dirpath)) and ('RT @' in tweets.text):
+                        with open(dirpath + "error.log", "a") as fp:
                             fp.write(
                                 str(id) + " already exists in the database or it is a retweet\n")
                     else:
                         if (isUserwhitelisted(user, data) or (isUserBanned(user, data) and isSafeKeyword(text, data))):
-                            nawab_store_id(id)
+                            nawab_store_id(id, dirpath)
                             url = 'https://twitter.com/' + \
                                 user + '/status/' + str(id)
-                            with open("nawab_results.log", "a") as fp:
+                            with open(dirpath + "results.log", "a") as fp:
                                 fp.write(url)
 
-                with open("nawab_results.log", "a") as fp:
+                with open(dirpath + "results.log", "a") as fp:
                     fp.write("Id: " + str(id) +
                              " is stored to the db from this iteration \n")
 
             except tweepy.TweepError as e:
-                with open("nawab_errors.log", "a") as fp:
+                with open(dirpath + "error.log", "a") as fp:
                     fp.write("Tweepy failed at " + str(id) +
                              " because of " + e.reason + "\n")
                 pass
 
 
-def nawab_retweet_tweet(api):
-    with open("tid_store.txt", "r") as fp:
+def nawab_retweet_tweet(api, dirpath):
+    with open(dirpath + "tid_store.txt", "r") as fp:
         for line in fp:
             tweet_id = int(line)
             try:
@@ -137,12 +139,12 @@ def nawab_retweet_tweet(api):
                 retweet_url = 'https://twitter.com/' + \
                     rt_username + '/status/' + str(tweet_id)
 
-                with open("nawab_results.log", "a") as fp:
+                with open(dirpath + "results.log", "a") as fp:
                     fp.write("Nawab retweeted " +
                              str(tweet_id) + " successfully \n")
 
             except tweepy.TweepError as e:
-                with open("nawab_errors.log", "a") as fp:
+                with open(dirpath + "error.log", "a") as fp:
                     fp.write("Tweepy failed to retweet after reading from the store of id " +
                              str(tweet_id) + " because of " + e.reason + "\n")
                 pass
@@ -150,10 +152,19 @@ def nawab_retweet_tweet(api):
 
 def main():
     data = pd.read_csv('data.csv')
+    default_dir = '/var/log/nawab/'
+
+    u_id = pwd.getpwuid( os.getuid() ).pw_name
+
+    if not os.path.exists(default_dir):
+        os.system(("sudo mkdir %s" % (default_dir)))
+
+    ownership_command = "sudo chown %s: %s" % (u_id, default_dir)
+    os.system(ownership_command)
 
     api = nawab_twitter_authenticate()
-    nawab_curate_list(api, data)
-    nawab_retweet_tweet(api)
+    nawab_curate_list(api, data, default_dir)
+    nawab_retweet_tweet(api, default_dir)
 
 
 if __name__ == "__main__":

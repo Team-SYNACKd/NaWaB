@@ -1,9 +1,5 @@
-twitter_credentials.json
 config.py
 __pycache__/
 .vscode/
 tg_config.py
 nawab/
-nawab_results.log
-nawab_errors.log
-tid_store.txt
