@@ -137,10 +137,12 @@ def nawab_retweet_tweet(api):
                 rt_username = u.author.screen_name
                 api.retweet(tweet_id)
                 time.sleep(60)
-                retweet_url = 'https://twitter.com/' + rt_username +  '/status/' + str(tweet_id)
-                                
+                retweet_url = 'https://twitter.com/' + \
+                    rt_username + '/status/' + str(tweet_id)
+
                 with open("nawab_results.log", "a") as fp:
-                    fp.write("Nawab retweeted " + str(tweet_id) + " successfully \n")
+                    fp.write("Nawab retweeted " +
+                             str(tweet_id) + " successfully \n")
 
             except tweepy.TweepError as e:
                 with open("nawab_errors.log", "a") as fp:
@@ -150,9 +152,9 @@ def nawab_retweet_tweet(api):
 
 
 def main():
-   api = nawab_twitter_authenticate()
-   nawab_curate_list(api)
-   nawab_retweet_tweet(api)
+    api = nawab_twitter_authenticate()
+    nawab_curate_list(api)
+    nawab_retweet_tweet(api)
 
 
 if __name__ == "__main__":
