@@ -23,6 +23,9 @@ def nawab_twitter_authenticate():
     api = tweepy.API(auth)
     return api
 """
+def nawab_tg_authenticate():
+    updater = Updater(token = tg.token, use_context = True)
+    return updater    
 
 
 def start(update, context):
@@ -70,7 +73,7 @@ def error(update, context):
 
 
 def main():
-    updater = Updater(token = tg.token, use_context = True)
+    updater = nawab_tg_authenticate()
 
     updater.dispatcher.add_handler(CommandHandler('start', start))
     updater.dispatcher.add_handler(CallbackQueryHandler(button))
