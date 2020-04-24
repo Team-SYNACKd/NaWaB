@@ -7,10 +7,8 @@ import mmap
 import time
 import random
 from datetime import date
-import pandas as pd
 import csv
 import os
-import pwd
 
 
 def nawab_twitter_authenticate():
@@ -147,24 +145,3 @@ def nawab_retweet_tweet(api, dirpath):
                     fp.write("Tweepy failed to retweet after reading from the store of id " +
                              str(tweet_id) + " because of " + e.reason + "\n")
                 pass
-
-
-def main():
-    data = pd.read_csv('data.csv')
-    default_dir = '/var/log/nawab/'
-
-    u_id = pwd.getpwuid( os.getuid() ).pw_name
-
-    if not os.path.exists(default_dir):
-        os.system(("sudo mkdir %s" % (default_dir)))
-
-    ownership_command = "sudo chown %s: %s" % (u_id, default_dir)
-    os.system(ownership_command)
-
-    api = nawab_twitter_authenticate()
-    nawab_curate_list(api, data, default_dir)
-    nawab_retweet_tweet(api, default_dir)
-
-
-if __name__ == "__main__":
-    main()
