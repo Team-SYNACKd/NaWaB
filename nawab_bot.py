@@ -66,11 +66,10 @@ def nawab_get_id(dirpath):
 
 def nawab_check_tweet(tweet_id, dirpath):
     with open(dirpath + "tid_store.txt", "r") as fp:
-        for line in fp:
-            if line == tweet_id:
-                return True
-            else:
-                return False
+         if any(line.strip() == tweet_id for line in fp):
+             return True
+         else:
+             return False
 
 
 def nawab_curate_list(api, data, dirpath):
