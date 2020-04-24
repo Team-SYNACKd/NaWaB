@@ -9,10 +9,11 @@ import threading
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler
 
 
-def twitter_bot_run(data, default_dir):
-    api = twitter_bot.nawab_twitter_authenticate()
-    twitter_bot.nawab_curate_list(api, data, default_dir)
-    twitter_bot.nawab_retweet_tweet(api, default_dir)
+def twitter_bot_run(data, dirpath):
+    tw_bot = twitter_bot.Twitter_Bot(data, dirpath)
+    api = tw_bot.nawab_twitter_authenticate()
+    tw_bot.nawab_curate_list(api)
+    tw_bot.nawab_retweet_tweet(api)
 
 
 def tg_bot_run(dirpath):
