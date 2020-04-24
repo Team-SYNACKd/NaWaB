@@ -3,6 +3,7 @@ import tg_bot
 import pandas as pd
 import pwd
 import os
+import threading
 
 #TODO: Shouldn't import this here. Need a way to derive this from tg_bot instead.
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler
@@ -29,7 +30,12 @@ def tg_bot_run():
     updater.idle()
 
 
+def wrapper(func, args, res):
+    res.append(func(*args))
+
+
 def main():
+    res = []
     data = pd.read_csv('data.csv')
     default_dir = '/var/log/nawab/'
 
@@ -42,9 +48,12 @@ def main():
     os.system(ownership_command)
 
     #Initiate twitter bot
-    twitter_bot_run(data, default_dir)
-    #Initiate telegram bot
-    tg_bot_run()
+    thread = threading.Thread(target=wrapper, args=(
+        twitter_bot_run, (data, default_dir, ), res))
+    thread.start()
+    while thread.is_alive:
+        #Initiate telegram bot
+        tg_bot_run()
 
 
 if __name__ == "__main__":
