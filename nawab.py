@@ -1,13 +1,32 @@
 import twitter_bot
+import tg_bot
 import pandas as pd
 import pwd
 import os
+
+#TODO: Shouldn't import this here. Need a way to derive this from tg_bot instead.
+from telegram.ext import Updater, CommandHandler, CallbackQueryHandler
 
 
 def twitter_bot_run(data, default_dir):
     api = twitter_bot.nawab_twitter_authenticate()
     twitter_bot.nawab_curate_list(api, data, default_dir)
     twitter_bot.nawab_retweet_tweet(api, default_dir)
+
+
+def tg_bot_run():
+    updater = tg_bot.nawab_tg_authenticate()
+
+    updater.dispatcher.add_handler(CommandHandler('start', tg_bot.start))
+    updater.dispatcher.add_handler(CallbackQueryHandler(tg_bot.button))
+    updater.dispatcher.add_error_handler(tg_bot.error)
+
+    # Start the Bot
+    updater.start_polling()
+
+    # Run the bot until the user presses Ctrl-C or the process receives SIGINT,
+    # SIGTERM or SIGABRT
+    updater.idle()
 
 
 def main():
@@ -22,7 +41,10 @@ def main():
     ownership_command = "sudo chown %s: %s" % (u_id, default_dir)
     os.system(ownership_command)
 
+    #Initiate twitter bot
     twitter_bot_run(data, default_dir)
+    #Initiate telegram bot
+    tg_bot_run()
 
 
 if __name__ == "__main__":
