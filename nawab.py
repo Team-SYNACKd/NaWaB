@@ -15,12 +15,13 @@ def twitter_bot_run(data, default_dir):
     twitter_bot.nawab_retweet_tweet(api, default_dir)
 
 
-def tg_bot_run():
-    updater = tg_bot.nawab_tg_authenticate()
+def tg_bot_run(dirpath):
+    bot = tg_bot.Telegram_Bot(dirpath)
+    updater = bot.nawab_tg_authenticate()
 
-    updater.dispatcher.add_handler(CommandHandler('start', tg_bot.start))
-    updater.dispatcher.add_handler(CallbackQueryHandler(tg_bot.button))
-    updater.dispatcher.add_error_handler(tg_bot.error)
+    updater.dispatcher.add_handler(CommandHandler('start', bot.start))
+    updater.dispatcher.add_handler(CallbackQueryHandler(bot.button))
+    updater.dispatcher.add_error_handler(bot.error)
 
     # Start the Bot
     updater.start_polling()
@@ -53,7 +54,7 @@ def main():
     thread.start()
     while thread.is_alive:
         #Initiate telegram bot
-        tg_bot_run()
+        tg_bot_run(default_dir)
 
 
 if __name__ == "__main__":
