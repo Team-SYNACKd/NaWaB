@@ -9,12 +9,15 @@ import random
 from datetime import date
 import csv
 import os
+import logging
 
 
 class Twitter_Bot(object):
     def __init__(self, dirpath, data):
         self.dirpath = dirpath
         self.data = data
+        self.setup_logger('log_result', dirpath + "results.log")
+        self.setup_logger('log_error', dirpath + "error.log")
 
     def nawab_twitter_authenticate(self):
         auth = tweepy.OAuthHandler(config.consumer_key, config.consumer_secret)
@@ -22,6 +25,26 @@ class Twitter_Bot(object):
                               config.access_token_secret)
         api = tweepy.API(auth)
         return api
+            ##setting up the logger  
+    def setup_logger(self, logger_name, log_file, level=logging.INFO):
+
+        log_setup = logging.getLogger(logger_name)
+        formatter = logging.Formatter('%(levelname)s: %(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+        fileHandler = logging.FileHandler(log_file, mode='a')
+        fileHandler.setFormatter(formatter)
+        streamHandler = logging.StreamHandler()
+        streamHandler.setFormatter(formatter)
+        log_setup.setLevel(level)
+        log_setup.addHandler(fileHandler)
+        log_setup.addHandler(streamHandler)
+        
+    def logger(self, msg, level, logfile):
+ 
+        if logfile == 'results'   : log = logging.getLogger('log_result')
+        if logfile == 'error'   : log = logging.getLogger('log_error') 
+        if level == 'info'    : log.info(msg) 
+        if level == 'warning' : log.warning(msg)
+        if level == 'error'   : log.error(msg)
 
     def nawab_read_list(self):
         search_list = []
@@ -86,7 +109,6 @@ class Twitter_Bot(object):
 
         if len(query) > 0:
             for line in query:
-
                 with open(self.dirpath + "results.log", "a") as fp:
                     fp.write("starting new query search: \t" + line + "\n")
 
@@ -108,11 +130,11 @@ class Twitter_Bot(object):
                                     user + '/status/' + str(id)
                                 with open(self.dirpath + "results.log", "a") as fp:
                                     fp.write(url)
-
+                                    
                     with open(self.dirpath + "results.log", "a") as fp:
                         fp.write("Id: " + str(id) +
                                  " is stored to the db from this iteration \n")
-
+                   
                 except tweepy.TweepError as e:
                     with open(self.dirpath + "error.log", "a") as fp:
                         fp.write("Tweepy failed at " + str(id) +
@@ -130,13 +152,12 @@ class Twitter_Bot(object):
                     time.sleep(60)
                     retweet_url = 'https://twitter.com/' + \
                         rt_username + '/status/' + str(tweet_id)
-
                     with open(self.dirpath + "results.log", "a") as fp:
                         fp.write("Nawab retweeted " +
                                  str(tweet_id) + " successfully \n")
 
                 except tweepy.TweepError as e:
-                    with open(self.dirpath + "error.log", "a") as fp:
+                     with open(self.dirpath + "error.log", "a") as fp:
                         fp.write("Tweepy failed to retweet after reading from the store of id " +
                                  str(tweet_id) + " because of " + e.reason + "\n")
-                    pass
+                     pass
