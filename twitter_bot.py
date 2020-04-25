@@ -9,12 +9,15 @@ import random
 from datetime import date
 import csv
 import os
+import logging
 
 
 class Twitter_Bot(object):
     def __init__(self, dirpath, data):
         self.dirpath = dirpath
         self.data = data
+        self.setup_logger('log_result', dirpath + "results.log")
+        self.setup_logger('log_error', dirpath + "error.log")
 
     def nawab_twitter_authenticate(self):
         auth = tweepy.OAuthHandler(config.consumer_key, config.consumer_secret)
@@ -22,6 +25,26 @@ class Twitter_Bot(object):
                               config.access_token_secret)
         api = tweepy.API(auth)
         return api
+            ##setting up the logger  
+    def setup_logger(self, logger_name, log_file, level=logging.INFO):
+
+        log_setup = logging.getLogger(logger_name)
+        formatter = logging.Formatter('%(levelname)s: %(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+        fileHandler = logging.FileHandler(log_file, mode='a')
+        fileHandler.setFormatter(formatter)
+        streamHandler = logging.StreamHandler()
+        streamHandler.setFormatter(formatter)
+        log_setup.setLevel(level)
+        log_setup.addHandler(fileHandler)
+        log_setup.addHandler(streamHandler)
+        
+    def logger(self, msg, level, logfile):
+ 
+        if logfile == 'results'   : log = logging.getLogger('log_result')
+        if logfile == 'error'   : log = logging.getLogger('log_error') 
+        if level == 'info'    : log.info(msg) 
+        if level == 'warning' : log.warning(msg)
+        if level == 'error'   : log.error(msg)
 
     def nawab_read_list(self):
         search_list = []
@@ -78,17 +101,14 @@ class Twitter_Bot(object):
         try:
             last_id = self.nawab_get_id()
         except FileNotFoundError as e:
-            fp = open(self.dirpath + "error.log", "a")
-            fp.write(
-                "No tweet id found, hence assuming no file created and therefore creating the new file \n")
+            self.logger('No tweet id found, hence assuming no file created and therefore creating the new file '
+                        , 'error', 'error')
             f = open(self.dirpath + "tid_store.txt", "w+")
             last_id = None
 
         if len(query) > 0:
             for line in query:
-
-                with open(self.dirpath + "results.log", "a") as fp:
-                    fp.write("starting new query search: \t" + line + "\n")
+                self.logger('starting new query search: \t' + line, 'info', 'results')
 
                 try:
                     for tweets in tweepy.Cursor(api.search, q=line, tweet_mode="extended",
@@ -98,25 +118,18 @@ class Twitter_Bot(object):
                         text = tweets.full_text
 
                         if (self.nawab_check_tweet(id)) and ('RT @' in tweets.text):
-                            with open(self.dirpath + "error.log", "a") as fp:
-                                fp.write(
-                                    str(id) + " already exists in the database or it is a retweet\n")
+                            self.logger(str(id) +'already exists in the database or it is a retweet', 'error', 'error')
                         else:
                             if (self.isUserwhitelisted(user) or (self.isUserBanned(user) and self.isSafeKeyword(text))):
                                 self.nawab_store_id(id)
                                 url = 'https://twitter.com/' + \
                                     user + '/status/' + str(id)
-                                with open(self.dirpath + "results.log", "a") as fp:
-                                    fp.write(url)
+                                self.logger(url, 'info', 'results')
 
-                    with open(self.dirpath + "results.log", "a") as fp:
-                        fp.write("Id: " + str(id) +
-                                 " is stored to the db from this iteration \n")
+                    self.logger('Id: ' + str(id) + 'is stored to the db from this iteration', 'info', 'results')
 
                 except tweepy.TweepError as e:
-                    with open(self.dirpath + "error.log", "a") as fp:
-                        fp.write("Tweepy failed at " + str(id) +
-                                 " because of " + e.reason + "\n")
+                    self.logger('Tweepy failed at ' + str(id) + 'because of' + e.reason, 'error', 'error')
                     pass
 
     def nawab_retweet_tweet(self, api):
@@ -131,12 +144,10 @@ class Twitter_Bot(object):
                     retweet_url = 'https://twitter.com/' + \
                         rt_username + '/status/' + str(tweet_id)
 
-                    with open(self.dirpath + "results.log", "a") as fp:
-                        fp.write("Nawab retweeted " +
-                                 str(tweet_id) + " successfully \n")
+                    self.logger('Nawab retweeted' + 
+                                str(tweet_id) + 'successfully', 'info', 'results')
 
                 except tweepy.TweepError as e:
-                    with open(self.dirpath + "error.log", "a") as fp:
-                        fp.write("Tweepy failed to retweet after reading from the store of id " +
-                                 str(tweet_id) + " because of " + e.reason + "\n")
+                    self.logger('Tweepy failed to retweet after reading from the store of id ' +
+                                str(tweet_id) + 'because of' + e.reason, 'error', 'error')
                     pass
