@@ -8,7 +8,7 @@ import time
 import nawab_logger
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Updater, CommandHandler, CallbackQueryHandler
+from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, ConversationHandler
 
 
 class Telegram_Bot(object):
@@ -21,6 +21,12 @@ class Telegram_Bot(object):
     def nawab_tg_authenticate(self):
         updater = Updater(token=config.tg_token, use_context=True)
         return updater
+
+    def help(self, update, context):
+        text = 'Hello, this is a bot which scrapes the tweets related to networks and gives you ' \
+                'an option to retweet the tweet as well. Type the command /start to start and ' \
+                '/stop to stop.'
+        update.message.reply_text(text = text)
 
     def start(self, update, context):
         with open(self.dirpath + "tid_store.txt", "r") as fp:
@@ -39,6 +45,10 @@ class Telegram_Bot(object):
                 reply_markup = InlineKeyboardMarkup(keyboard)
                 update.message.reply_text(text=url, reply_markup=reply_markup)
                 #time.sleep(10)
+
+    def stop(self, update, context):
+        update.message.reply_text("Okay, Bye")
+        return ConversationHandler.END
 
     def button(self, update, context):
         query = update.callback_query

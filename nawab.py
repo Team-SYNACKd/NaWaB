@@ -6,7 +6,7 @@ import os
 import threading
 
 #TODO: Shouldn't import this here. Need a way to derive this from tg_bot instead.
-from telegram.ext import Updater, CommandHandler, CallbackQueryHandler
+from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, ConversationHandler
 
 
 def retrieve_twitter_auth(dirpath, data):
@@ -27,6 +27,8 @@ def tg_bot_run(data, dirpath):
     updater = bot.nawab_tg_authenticate()
 
     updater.dispatcher.add_handler(CommandHandler('start', bot.start))
+    updater.dispatcher.add_handler(CommandHandler('help',bot.help))
+    updater.dispatcher.add_handler(CommandHandler('stop',bot.stop))
     updater.dispatcher.add_handler(CallbackQueryHandler(bot.button))
     updater.dispatcher.add_error_handler(bot.error)
 
