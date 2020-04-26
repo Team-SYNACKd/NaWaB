@@ -10,7 +10,7 @@ from telegram.ext import Updater, CommandHandler, CallbackQueryHandler
 
 
 def twitter_bot_run(data, dirpath):
-    tw_bot = twitter_bot.Twitter_Bot(data, dirpath)
+    tw_bot = twitter_bot.Twitter_Bot(dirpath, data)
     api = tw_bot.nawab_twitter_authenticate()
     tw_bot.nawab_curate_list(api)
     tw_bot.nawab_retweet_tweet(api)
