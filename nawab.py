@@ -16,8 +16,10 @@ def twitter_bot_run(data, dirpath):
     tw_bot.nawab_retweet_tweet(api)
 
 
-def tg_bot_run(dirpath):
-    bot = tg_bot.Telegram_Bot(dirpath)
+def tg_bot_run(data, dirpath):
+    tbot = twitter_bot.Twitter_Bot(data, dirpath)
+    api = tbot.nawab_twitter_authenticate()
+    bot = tg_bot.Telegram_Bot(api, dirpath)
     updater = bot.nawab_tg_authenticate()
 
     updater.dispatcher.add_handler(CommandHandler('start', bot.start))
@@ -55,7 +57,7 @@ def main():
     thread.start()
     while thread.is_alive:
         #Initiate telegram bot
-        tg_bot_run(default_dir)
+        tg_bot_run(data, default_dir)
 
 
 if __name__ == "__main__":

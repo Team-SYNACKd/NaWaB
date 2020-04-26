@@ -17,22 +17,19 @@ logger = logging.getLogger(__name__)
 
 class Telegram_Bot(object):
 
-    def __init__(self, dirpath):
+    def __init__(self, twitter_api, dirpath):
         self.dirpath = dirpath
+        self.twitter_api = twitter_api
 
     def nawab_tg_authenticate(self):
         updater = Updater(token=tg.token, use_context=True)
         return updater
 
     def start(self, update, context):
-        auth = tweepy.OAuthHandler(config.consumer_key, config.consumer_secret)
-        auth.set_access_token(config.access_token_key,
-                              config.access_token_secret)
-        api = tweepy.API(auth)
         with open(self.dirpath + "tid_store.txt", "r") as fp:
             for line in fp:
                 try:
-                    u = api.get_status(id=line)
+                    u = self.twitter_api.get_status(id=line)
                     username = u.author.screen_name
                 except tweepy.TweepError as e:
                     with open(self.dirpath + "error.log", "a") as fp:
@@ -49,16 +46,12 @@ class Telegram_Bot(object):
 
     def button(self, update, context):
         query = update.callback_query
-        auth = tweepy.OAuthHandler(config.consumer_key, config.consumer_secret)
-        auth.set_access_token(config.access_token_key,
-                              config.access_token_secret)
-        api = tweepy.API(auth)
         # CallbackQueries need to be answered, even if no notification to the user is needed
         # Some clients may have trouble otherwise. See https://core.telegram.org/bots/api#callbackquery
         query.answer()
         data = query.data
         try:
-            api.retweet(data)
+            self.twitter_api.retweet(data)
         except tweepy.TweepError as e:
             with open(self.dirpath + "error.log", "a") as fp:
                 fp.write("Tweepy failed to retweet after reading from the store of id " +
