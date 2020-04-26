@@ -45,7 +45,7 @@ def wrapper(func, args, res):
 def main():
     res = []
     data = pd.read_csv('data.csv')
-    default_dir = '/var/tmp/'
+    default_dir = '/var/log/nawab/'
 
     u_id = pwd.getpwuid(os.getuid()).pw_name
 
