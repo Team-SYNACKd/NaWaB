@@ -6,13 +6,10 @@ import config
 import tweepy
 import tg_config as tg
 import time
+import nawab_logger
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler
-
-logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-                    level=logging.INFO)
-logger = logging.getLogger(__name__)
 
 
 class Telegram_Bot(object):
@@ -20,6 +17,7 @@ class Telegram_Bot(object):
     def __init__(self, twitter_api, dirpath):
         self.dirpath = dirpath
         self.twitter_api = twitter_api
+        self.nw_logger = nawab_logger.Nawab_Logging(dirpath)
 
     def nawab_tg_authenticate(self):
         updater = Updater(token=tg.token, use_context=True)
@@ -32,9 +30,8 @@ class Telegram_Bot(object):
                     u = self.twitter_api.get_status(id=line)
                     username = u.author.screen_name
                 except tweepy.TweepError as e:
-                    with open(self.dirpath + "error.log", "a") as fp:
-                        fp.write("Tweepy failed to get the status of the user from the " +
-                                 str(line) + " because of " + e.reason + "\n")
+                    self.nw_logger.logger('\t|Tweepy failed to get the status of the user from the ' +
+                                 str(line) + ' because of ' + e.reason + '\n\n', 'error', 'error')
                     pass
                 url = 'https://twitter.com/' + \
                     username + '/status/' + str(line)
@@ -53,12 +50,11 @@ class Telegram_Bot(object):
         try:
             self.twitter_api.retweet(data)
         except tweepy.TweepError as e:
-            with open(self.dirpath + "error.log", "a") as fp:
-                fp.write("Tweepy failed to retweet after reading from the store of id " +
-                         str(data) + " because of " + e.reason + "\n")
+            self.nw_logger.logger('\t|Tweepy failed to retweet after reading from the store of id ' +
+                                 str(data) + ' because of ' + e.reason + '\n\n', 'error', 'error')
             pass
         query.edit_message_text(text="Retweeted: {}".format(query.data))
 
     def error(self, update, context):
         """Log Errors caused by Updates."""
-        logger.warning('Update "%s" caused error "%s"', update, context.error)
+        self.nw_logger.logger('\t|Update' + update + 'caused error ' + context.error +'\n\n', 'error', 'error')
