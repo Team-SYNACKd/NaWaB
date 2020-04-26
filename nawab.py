@@ -4,6 +4,7 @@ import pandas as pd
 import pwd
 import os
 import threading
+import argparse
 
 #TODO: Shouldn't import this here. Need a way to derive this from tg_bot instead.
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, ConversationHandler
@@ -52,6 +53,18 @@ def wrapper(func, args, res):
 
 
 def main():
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument("-r", "--retweet", help="Retweet all tweets automatically, doesn't spawn a telegram bot",
+                        action='store_true', required=False)
+    parser.add_argument("-t", "--tg_bot", help="Doesn't retweet all automatically, can manually retweet through telegram bot",
+                        action='store_true', required=False)
+    parser.add_argument('-h', '--help', action='help', default=argparse.SUPPRESS,
+                        help='Show this help message and exit.')
+    parser.add_argument('-v', '--version', action='version',
+                        version='%(prog)s 1.0', help="Show program's version number and exit.")
+
+    args = vars(parser.parse_args())
+
     res = []
     data = pd.read_csv('data.csv')
     default_dir = '/var/log/nawab/'
