@@ -2,12 +2,11 @@ import logging
 
 
 class Nawab_Logging(object):
-    
+
     def __init__(self, dirpath):
        self.setup_logger('result', dirpath + "results.log")
        self.setup_logger('error', dirpath + "error.log")
-        
-    
+
      ##setting up the logger
     def setup_logger(self, logger_name, log_file, level=logging.INFO):
         log_setup = logging.getLogger(logger_name)
@@ -20,23 +19,21 @@ class Nawab_Logging(object):
         log_setup.setLevel(level)
         log_setup.addHandler(fileHandler)
         log_setup.addHandler(streamHandler)
-        
-        pass
-    
+
     def logger(self, msg, level, logfile):
 
         if logfile == 'results':
             log = logging.getLogger('result')
-        if logfile == 'error':
+        elif logfile == 'error':
             log = logging.getLogger('error')
+        else:
+            print('Invalid logging option')
+
         if level == 'info':
             log.info(msg)
-        if level == 'warning':
+        elif level == 'warning':
             log.warning(msg)
-        if level == 'error':
+        elif level == 'error':
             log.error(msg)
-        pass
-    
-
-        
-    
+        else:
+            print('Invalid message')
