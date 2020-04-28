@@ -31,7 +31,7 @@ class Telegram_Bot(object):
                     username = u.author.screen_name
                 except tweepy.TweepError as e:
                     self.nw_logger.logger('\t|Tweepy failed to get the status of the user from the ' +
-                                 str(line) + ' because of ' + e.reason + '\n\n', 'error', 'error')
+                                          str(line) + ' because of ' + e.reason + '\n\n', 'error', 'Error')
                     pass
                 url = 'https://twitter.com/' + \
                     username + '/status/' + str(line)
@@ -51,10 +51,11 @@ class Telegram_Bot(object):
             self.twitter_api.retweet(data)
         except tweepy.TweepError as e:
             self.nw_logger.logger('\t|Tweepy failed to retweet after reading from the store of id ' +
-                                 str(data) + ' because of ' + e.reason + '\n\n', 'error', 'error')
+                                  str(data) + ' because of ' + e.reason + '\n\n', 'error', 'Error')
             pass
         query.edit_message_text(text="Retweeted: {}".format(query.data))
 
     def error(self, update, context):
         """Log Errors caused by Updates."""
-        self.nw_logger.logger('\t|Update' + update + 'caused error ' + context.error +'\n\n', 'error', 'error')
+        self.nw_logger.logger(
+            '\t|Update' + update + 'caused error ' + context.error + '\n\n', 'error', 'Error')
