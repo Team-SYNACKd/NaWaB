@@ -8,4 +8,3 @@ tw_access_token_secret = ""
 # Telegram API keys
 
 tg_token = ""
-tg_chat_id = ""
