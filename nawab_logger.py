@@ -16,9 +16,13 @@ class Nawab_Logging(object):
         fileHandler.setFormatter(formatter)
         streamHandler = logging.StreamHandler()
         streamHandler.setFormatter(formatter)
+        ## Clear up any existing in handler
         log_setup.setLevel(level)
+        if (log_setup.hasHandlers()):
+            log_setup.handlers.clear()
         log_setup.addHandler(fileHandler)
         log_setup.addHandler(streamHandler)
+        log_setup.propagate = False
 
     def logger(self, msg, level, logfile):
 
