@@ -4,7 +4,6 @@ import logging
 import telegram
 import config
 import tweepy
-import tg_config as tg
 import time
 import nawab_logger
 
@@ -20,7 +19,7 @@ class Telegram_Bot(object):
         self.nw_logger = nawab_logger.Nawab_Logging(dirpath)
 
     def nawab_tg_authenticate(self):
-        updater = Updater(token=tg.token, use_context=True)
+        updater = Updater(token=config.tg_token, use_context=True)
         return updater
 
     def start(self, update, context):
