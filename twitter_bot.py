@@ -20,9 +20,9 @@ class Twitter_Bot(object):
         self.nw_logger = nawab_logger.Nawab_Logging(dirpath)
 
     def nawab_twitter_authenticate(self):
-        auth = tweepy.OAuthHandler(config.consumer_key, config.consumer_secret)
-        auth.set_access_token(config.access_token_key,
-                              config.access_token_secret)
+        auth = tweepy.OAuthHandler(config.tw_consumer_key, config.tw_consumer_secret)
+        auth.set_access_token(config.tw_access_token_key,
+                              config.tw_access_token_secret)
         api = tweepy.API(auth)
         return api
 
