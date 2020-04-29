@@ -17,6 +17,10 @@ This bot is a content curator for the topics related to the networks. Made with 
     *  `Banwords`  contains the banned words which again would be ignored by the bot.
     *  `Whitelist` contains the whitelisted acccounts usernames, whose tweets would be tweeted.
 
+
+## Usage of bot
+To start the bot we made, send a `/start` to [@info_nawab_bot](https://t.me/info_nawab_bot). Normal users would only be able to view the tweets.
+
 ## Getting Started
 * Clone the repository
 ```
@@ -38,6 +42,16 @@ $ source <virtualenv name>/bin/activate
 ```
 $ pip install -r requirements.txt
 ```
+
+* Make the directory for the log storage
+```
+$ sudo mkdir /var/log/nawab
+```
+
+* Fill the `config.py`
+  * The `config.py` is the file for all the necessary tokens of twitter as well as telegram. 
+  * For creating the twitter tokens visit [here](https://developer.twitter.com/en/apps/create).
+  * For the telegram bot, you must create one. After creating fill the `tg_token` with your bot's token. To create a bot visit [here](https://core.telegram.org/bots#3-how-do-i-create-a-bot).
 
 * Run the script
 ```
