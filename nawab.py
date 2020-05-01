@@ -12,12 +12,13 @@ from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, Conversa
 
 class Nawab(object):
 
-    def __init__(self, dirpath, data):
+    def __init__(self, dirpath, data, level):
         self.dirpath = dirpath
         self.data = data
+        self.level = level
 
     def retrieve_twitter_auth(self):
-        tw_bot = twitter_bot.Twitter_Bot(self.dirpath, self.data)
+        tw_bot = twitter_bot.Twitter_Bot(self.dirpath, self.data, self.level)
         api = tw_bot.nawab_twitter_authenticate()
         return tw_bot, api
 
@@ -54,30 +55,35 @@ def wrapper(func, args, res):
 
 def main():
     parser = argparse.ArgumentParser(add_help=False)
-    parser.add_argument("-r", "--retweet", help="Retweet all tweets automatically, doesn't spawn a telegram bot",
-                        action='store_true', required=False)
-    parser.add_argument("-t", "--tg_bot", help="Doesn't retweet all automatically, can manually retweet through telegram bot",
-                        action='store_true', required=False)
+    parser.add_argument('-d', '--default', action="store_const", const=30)
+    parser.add_argument('-V', '--verbose',action="store_const", const=20)
+    parser.add_argument('-s', '--silent', action="store_const", const=50)
     parser.add_argument('-h', '--help', action='help', default=argparse.SUPPRESS,
                         help='Show this help message and exit.')
     parser.add_argument('-v', '--version', action='version',
                         version='%(prog)s 1.0', help="Show program's version number and exit.")
 
     args = vars(parser.parse_args())
-
+    ## set manual loglevels
+    if args['default']:
+        level = args['default']
+    elif args['verbose']:
+        level = args['verbose']
+    elif args['silent']:
+        level = args['silent']
+    else:
+        level = 10
+    
     res = []
     data = pd.read_csv('data.csv')
     default_dir = '/var/log/nawab/'
-
+   
     u_id = pwd.getpwuid(os.getuid()).pw_name
-
-    if not os.path.exists(default_dir):
-        os.system(("sudo mkdir %s" % (default_dir)))
 
     ownership_command = "sudo chown %s: %s" % (u_id, default_dir)
     os.system(ownership_command)
 
-    nawab = Nawab(default_dir,data)
+    nawab = Nawab(default_dir,data,level)
     #Initiate twitter bot
     thread = threading.Thread(target=wrapper, args=(
         nawab.twitter_bot_run, (), res))
