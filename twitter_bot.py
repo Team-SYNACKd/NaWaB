@@ -103,7 +103,8 @@ class Twitter_Bot(object):
                                 '\t|' + str(id) + 'already exists in the database or it is a retweet', 'error', 'Error')
                         else:
                             if (self.isUserwhitelisted(user) or (self.isUserBanned(user) and self.isSafeKeyword(text))):
-                                self.nawab_store_id(id)
+                                if not (self.nawab_check_tweet(id)):
+                                    self.nawab_store_id(id)
                                 url = 'https://twitter.com/' + \
                                     user + '/status/' + str(id)
                                 self.nw_logger.logger(
