@@ -28,7 +28,6 @@ def tg_bot_run(data, dirpath):
 
     updater.dispatcher.add_handler(CommandHandler('start', bot.start))
     updater.dispatcher.add_handler(CommandHandler('help',bot.help))
-    updater.dispatcher.add_handler(CommandHandler('stop',bot.stop))
     updater.dispatcher.add_handler(CallbackQueryHandler(bot.button))
     updater.dispatcher.add_error_handler(bot.error)
 
