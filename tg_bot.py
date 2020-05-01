@@ -10,7 +10,6 @@ import nawab_logger
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, ConversationHandler
 
-
 class Telegram_Bot(object):
 
     def __init__(self, twitter_api, dirpath):
@@ -23,10 +22,12 @@ class Telegram_Bot(object):
         return updater
 
     def help(self, update, context):
-        text = 'Hello, this is a bot which scrapes the tweets related to networks and gives you ' \
-                'an option to retweet the tweet as well. Type the command /start to start and ' \
-                '/stop to stop.'
-        update.message.reply_text(text = text)
+        text = 'The retweet option is only for the bot admins. However normal users can view the tweet.'\
+                '\nSee the available commands in the keyboard below.'
+        url = 'https://github.com/Aniketh01/NaWaB/'
+        keyboard = [[InlineKeyboardButton("Source Code", url = url)]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        update.message.reply_text(text = text, reply_markup = reply_markup)
 
     def start(self, update, context):
         with open(self.dirpath + "tid_store.txt", "r") as fp:
@@ -46,10 +47,6 @@ class Telegram_Bot(object):
                 update.message.reply_text(text=url, reply_markup=reply_markup)
                 #time.sleep(10)
 
-    def stop(self, update, context):
-        update.message.reply_text("Okay, Bye")
-        return ConversationHandler.END
-
     def button(self, update, context):
         query = update.callback_query
         # CallbackQueries need to be answered, even if no notification to the user is needed
@@ -60,9 +57,21 @@ class Telegram_Bot(object):
             self.twitter_api.retweet(data)
         except tweepy.TweepError as e:
             self.nw_logger.logger('\t|Tweepy failed to retweet after reading from the store of id ' +
-                                  str(data) + ' because of ' + e.reason + '\n\n', 'error', 'Error')
+                                str(data) + ' because of ' + e.reason + '\n\n', 'error', 'Error')
             pass
-        query.edit_message_text(text="Retweeted: {}".format(query.data))
+        try:
+            u = self.twitter_api.get_status(id=int(data))
+            username = u.author.screen_name
+        except tweepy.TweepError as e:
+            self.nw_logger.logger('\t|Tweepy failed to get the status of the user from the ' +
+                                    str(data) + ' because of ' + e.reason + '\n\n', 'error', 'Error')
+            pass
+        url = 'https://twitter.com/' + \
+            username + '/status/' + str(data)
+        keyboard = [[InlineKeyboardButton(
+                    "View", url = url)]]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        query.edit_message_text(text="Retweeted: {}".format(url),reply_markup = reply_markup)
 
     def error(self, update, context):
         """Log Errors caused by Updates."""
