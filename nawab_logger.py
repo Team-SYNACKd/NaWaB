@@ -3,9 +3,9 @@ import logging
 
 class Nawab_Logging(object):
 
-    def __init__(self, dirpath):
-       self.setup_logger('Results', dirpath + "results.log")
-       self.setup_logger('Error', dirpath + "error.log")
+    def __init__(self, dirpath, level):
+       self.setup_logger('Results', dirpath + "results.log", level)
+       self.setup_logger('Error', dirpath + "error.log", level)
 
      ##setting up the logger
     def setup_logger(self, logger_name, log_file, level=logging.INFO):

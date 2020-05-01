@@ -15,10 +15,11 @@ import pandas as pd
 
 
 class Twitter_Bot(object):
-    def __init__(self, dirpath, data):
+    def __init__(self, dirpath, data, level):
         self.dirpath = dirpath
         self.data = data
-        self.nw_logger = nawab_logger.Nawab_Logging(dirpath)
+        self.level= level
+        self.nw_logger = nawab_logger.Nawab_Logging(dirpath, self.level)
         if not os.path.isfile(self.dirpath + 'tid_store.csv'):
             with open(self.dirpath + 'tid_store.csv', 'w') as f:
                 Headers = ['Date_time', 'Id']
@@ -88,6 +89,12 @@ class Twitter_Bot(object):
 
         if len(query) > 0:
             for line in query:
+                if self.level == 50 or self.level == 30:
+                    
+                    with open(self.dirpath + "results.log", "a") as fp:
+                        fp.write('INFO:' + time.strftime("%m/%d/%Y %I:%M:%S %p ") + 
+                                 "\t|starting new query search: \t" + line + "\n")
+                        
                 self.nw_logger.logger(
                     '\t|starting new query search: \t' + line, 'info', 'Results')
 
@@ -107,13 +114,27 @@ class Twitter_Bot(object):
                                     self.nawab_store_id(id)
                                 url = 'https://twitter.com/' + \
                                     user + '/status/' + str(id)
+                                    
+                                if self.level == 50 or self.level == 30:
+                                    with open(self.dirpath + "results.log", "a") as fp:
+                                        fp.write('INFO:' + time.strftime("%m/%d/%Y %I:%M:%S %p ") + '\t|' + url + '\n')
+                                        
                                 self.nw_logger.logger(
-                                    '\t|' + url, 'info', 'Results')
-
+                                    '\t|' + url + '\n', 'info', 'Results')
+                                
+                    if self.level == 50 or self.level == 30:
+                         with open(self.dirpath + "results.log", "a") as fp:
+                            fp.write('INFO:' + time.strftime("%m/%d/%Y %I:%M:%S %p ") + "\t|Id: " + str(id) +
+                                 " is stored to the db from this iteration \n")
+                        
                     self.nw_logger.logger(
                         '\t|Id: ' + str(id) + 'is stored to the db from this iteration', 'info', 'Results')
 
                 except tweepy.TweepError as e:
+                    if self.level == 50:
+                        with open(self.dirpath + "error.log", "a") as fp:
+                            fp.write('ERROR:' + time.strftime("%m/%d/%Y %I:%M:%S %p ") + "\t|Tweepy failed at " + str(id) +
+                                 " because of " + e.reason + "\n")
                     self.nw_logger.logger(
                         '\t|Tweepy failed at ' + str(id) + 'because of' + e.reason, 'error', 'Error')
                     pass

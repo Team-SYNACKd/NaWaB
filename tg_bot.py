@@ -15,10 +15,11 @@ KILL_SIGNAL = 0
 
 class Telegram_Bot(object):
 
-    def __init__(self, twitter_api, dirpath):
+    def __init__(self, twitter_api, dirpath,level):
         self.dirpath = dirpath
         self.twitter_api = twitter_api
-        self.nw_logger = nawab_logger.Nawab_Logging(dirpath)
+        self.level = level
+        self.nw_logger = nawab_logger.Nawab_Logging(dirpath, level)
 
 
     def nawab_tg_authenticate(self):
@@ -91,6 +92,12 @@ class Telegram_Bot(object):
         try:
             self.twitter_api.retweet(data)
         except tweepy.TweepError as e:
+            
+            if self.level == 50:
+                with open(self.dirpath + "error.log", "a") as fp:
+                    fp.write('ERROR' + time.strftime("%m/%d/%Y %I:%M:%S %p ") + "\t|Tweepy failed to retweet after reading from the store of id " +
+                         str(data) + " because of " + e.reason + "\n")
+                
             self.nw_logger.logger('\t|Tweepy failed to retweet after reading from the store of id ' +
                                 str(data) + ' because of ' + e.reason + '\n\n', 'error', 'Error')
             pass
@@ -111,6 +118,10 @@ class Telegram_Bot(object):
 
     def error(self, update, context):
         """Log Errors caused by Updates."""
+        if self.level == 50:
+            with open(self.dirpath + "error.log", "a") as fp:
+                fp.write('ERROR' + time.strftime("%m/%d/%Y %I:%M:%S %p ") + '\t|Update' + update + 'caused error ' + context.error + '\n\n')
+                
         self.nw_logger.logger(
             '\t|Update' + update + 'caused error ' + context.error + '\n\n', 'error', 'Error')
     
