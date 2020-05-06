@@ -39,5 +39,7 @@ class Nawab_Logging(object):
             log.warning(msg)
         elif level == 'error':
             log.error(msg)
+        elif level == 'debug':
+            log.debug(msg)
         else:
             print('Invalid message')

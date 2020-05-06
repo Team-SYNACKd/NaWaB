@@ -63,6 +63,7 @@ class Twitter_Bot(object):
     def isSafeKeyword(self, tweetText):
         ### Search if tweettext is safe
         if not any(str(word["Banwords"]).lower() in tweetText.lower() for index, word in self.data.iterrows()):
+            self.nw_logger.logger("\t|The keyword is safe: \n", 'debug', 'Error')
             return True
         return False
 
@@ -75,8 +76,10 @@ class Twitter_Bot(object):
     def nawab_check_tweet(self, tweet_id):
         tid = pd.read_csv(self.dirpath + 'tid_store.csv')
         if any(tid_store["Id"] == tweet_id for index, tid_store in tid.iterrows()):
+            self.nw_logger.logger("\t|No duplicate tweet spawned\n", 'debug', 'Error')
             return True
         else:
+            self.nw_logger.logger("\t| duplicate tweet spawned!! with id:" + tweet_id + "\n", 'debug', 'Error')
             return False
     
     def nawab_curate_list(self, api):
