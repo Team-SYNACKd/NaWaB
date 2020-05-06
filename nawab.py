@@ -26,10 +26,12 @@ def tg_bot_run(data, dirpath):
     bot = tg_bot.Telegram_Bot(api, dirpath)
     updater = bot.nawab_tg_authenticate()
 
-    updater.dispatcher.add_handler(CommandHandler('start', bot.start))
-    updater.dispatcher.add_handler(CommandHandler('help',bot.help))
-    updater.dispatcher.add_handler(CallbackQueryHandler(bot.button))
-    updater.dispatcher.add_error_handler(bot.error)
+    dp = updater.dispatcher
+    dp.add_handler(CommandHandler('start', bot.start))
+    dp.add_handler(CommandHandler("stop", bot.stop, pass_chat_data=True))
+    dp.add_handler(CommandHandler('help',bot.help))
+    dp.add_handler(CallbackQueryHandler(bot.button))
+    dp.add_error_handler(bot.error)
 
     # Start the Bot
     updater.start_polling()
