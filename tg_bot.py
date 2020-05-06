@@ -6,6 +6,7 @@ import config
 import tweepy
 import time
 import nawab_logger
+import pandas as pd
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, ConversationHandler
@@ -37,31 +38,32 @@ class Telegram_Bot(object):
         print('starting display parameter')
         job = context.job
         global KILL_SIGNAL
-        with open(self.dirpath + "tid_store.txt", "r") as fp:
-            for line in fp:
-                try:
-                    u = self.twitter_api.get_status(id=line)
-                    username = u.author.screen_name
-                except tweepy.TweepError as e:
-                    self.nw_logger.logger('\t|Tweepy failed to get the status of the user from the ' +
-                                            str(line) + ' because of ' + e.reason + '\n\n', 'error', 'Error')
-                    pass
-                url = 'https://twitter.com/' + \
-                    username + '/status/' + str(line)
-                    
-                if job.context in config.tg_admin_id:
-                    keyboard = [[InlineKeyboardButton("Retweet", callback_data=int(line)),InlineKeyboardButton("View", url=url)]]
-                    reply_markup = InlineKeyboardMarkup(keyboard)
-                else:
-                    keyboard = [[InlineKeyboardButton(
-                        "View", url=url)]]
-                    reply_markup = InlineKeyboardMarkup(keyboard)
-                if KILL_SIGNAL == 0:
-                    context.bot.send_message(job.context, text=str(url), reply_markup = reply_markup)
-                    #time.sleep(10)
-                else:
-                    KILL_SIGNAL = 0
-                    break
+        tid = pd.read_csv(self.dirpath + 'tid_store.csv')
+        for index, Id in tid.iterrows():
+            
+            try:
+                u = self.twitter_api.get_status(id=Id['Id'])
+                username = u.author.screen_name
+            except tweepy.TweepError as e:
+                self.nw_logger.logger('\t|Tweepy failed to get the status of the user from the ' +
+                                        str(Id['Id']) + ' because of ' + e.reason + '\n\n', 'error', 'Error')
+                pass
+            url = 'https://twitter.com/' + \
+                username + '/status/' + str(Id['Id'])
+                
+            if job.context in config.tg_admin_id:
+                keyboard = [[InlineKeyboardButton("Retweet", callback_data=int(Id['Id'])),InlineKeyboardButton("View", url=url)]]
+                reply_markup = InlineKeyboardMarkup(keyboard)
+            else:
+                keyboard = [[InlineKeyboardButton(
+                    "View", url=url)]]
+                reply_markup = InlineKeyboardMarkup(keyboard)
+            if KILL_SIGNAL == 0:
+                context.bot.send_message(job.context, text=str(url), reply_markup = reply_markup)
+                #time.sleep(10)
+            else:
+                KILL_SIGNAL = 0
+                break
 
 
     def start(self, update, context):
