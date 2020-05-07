@@ -48,9 +48,14 @@ class Telegram_Bot(object):
                     pass
                 url = 'https://twitter.com/' + \
                     username + '/status/' + str(line)
-                keyboard = [[InlineKeyboardButton(
-                    "Retweet", callback_data=int(line))]]
-                reply_markup = InlineKeyboardMarkup(keyboard)
+                    
+                if job.context in config.tg_admin_id:
+                    keyboard = [[InlineKeyboardButton("Retweet", callback_data=int(line)),InlineKeyboardButton("View", url=url)]]
+                    reply_markup = InlineKeyboardMarkup(keyboard)
+                else:
+                    keyboard = [[InlineKeyboardButton(
+                        "View", url=url)]]
+                    reply_markup = InlineKeyboardMarkup(keyboard)
                 if KILL_SIGNAL == 0:
                     context.bot.send_message(job.context, text=str(url), reply_markup = reply_markup)
                     #time.sleep(10)
@@ -61,7 +66,7 @@ class Telegram_Bot(object):
 
     def start(self, update, context):
         print('starting bot')
-        chat_id = update.message.chat_id
+        chat_id = int(update.message.chat_id)
         try:
             if 'job' in context.chat_data:
                 old_job = context.chat_data['job']
