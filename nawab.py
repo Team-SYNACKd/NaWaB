@@ -66,6 +66,7 @@ def main():
                         action='store_true', required=False)
     parser.add_argument("-t", "--tg_bot", help="Doesn't retweet all automatically, can manually retweet through telegram bot",
                         action='store_true', required=False)
+    parser.add_argument("-b", "--blacklist",type=list, required=False, help="Blacklist the given username")
     parser.add_argument('-d', '--default', action="store_const", const=30)
     parser.add_argument('-V', '--verbose',action="store_const", const=20)
     parser.add_argument('-s', '--silent', action="store_const", const=50)
@@ -84,10 +85,17 @@ def main():
         level = args['silent']
     else:
         level = 10
-    
+    names = args['blacklist']
+
     res = []
     data = pd.read_csv('data.csv')
     default_dir = '/var/log/nawab/'
+    ## blacklisting the names to current data.csv files
+    if names:
+        blist = pd.DataFrame({'Blacklist': names})
+        concats = pd.concat([data,blist])
+        concats.to_csv('data.csv', index=False)
+
    
     u_id = pwd.getpwuid(os.getuid()).pw_name
 
