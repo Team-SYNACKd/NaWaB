@@ -67,6 +67,8 @@ def main():
     parser.add_argument("-t", "--tg_bot", help="Doesn't retweet all automatically, can manually retweet through telegram bot",
                         action='store_true', required=False)
     parser.add_argument("-b", "--blacklist",type=list, required=False, help="Blacklist the given username")
+    parser.add_argument("-p", "--path", type=str, required=False,
+                        help="Path where the log files be stored. Note to create directory in that path beforehand.")
     parser.add_argument('-d', '--default', action="store_const", const=30)
     parser.add_argument('-V', '--verbose',action="store_const", const=20)
     parser.add_argument('-s', '--silent', action="store_const", const=50)
@@ -95,8 +97,10 @@ def main():
         blist = pd.DataFrame({'Blacklist': names})
         concats = pd.concat([data,blist])
         concats.to_csv('data.csv', index=False)
+    ## if new path is passed then set new default path
+    if args['path']:
+        default_dir = args['path']
 
-   
     u_id = pwd.getpwuid(os.getuid()).pw_name
 
     ownership_command = "sudo chown %s: %s" % (u_id, default_dir)
