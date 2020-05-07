@@ -23,10 +23,17 @@ class Nawab(object):
         return tw_bot, api
 
 
+<<<<<<< HEAD
     def twitter_bot_run(self):
         tw_bot, api = self.retrieve_twitter_auth()
         tw_bot.nawab_curate_list(api)
         tw_bot.nawab_retweet_tweet(api)
+=======
+def tg_bot_run(data, dirpath,level, isretweet=False, manual_tweet=False):
+    tw_bot, api = retrieve_twitter_auth(dirpath, data,level)
+    bot = tg_bot.Telegram_Bot(api, dirpath,level,isretweet, manual_tweet)
+    updater = bot.nawab_tg_authenticate()
+>>>>>>> Nawab: Add arguments to incoporate auto-retweet and manual-retweet
 
 
     def tg_bot_run(self):
@@ -55,6 +62,10 @@ def wrapper(func, args, res):
 
 def main():
     parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument("-r", "--retweet", help="Retweet all tweets automatically, doesn't spawn a telegram bot",
+                        action='store_true', required=False)
+    parser.add_argument("-t", "--tg_bot", help="Doesn't retweet all automatically, can manually retweet through telegram bot",
+                        action='store_true', required=False)
     parser.add_argument('-d', '--default', action="store_const", const=30)
     parser.add_argument('-V', '--verbose',action="store_const", const=20)
     parser.add_argument('-s', '--silent', action="store_const", const=50)
@@ -90,7 +101,11 @@ def main():
     thread.start()
     while thread.is_alive:
         #Initiate telegram bot
+<<<<<<< HEAD
         nawab.tg_bot_run()
+=======
+        tg_bot_run(data, default_dir, level, args['retweet'], args['tg_bot'])
+>>>>>>> Nawab: Add arguments to incoporate auto-retweet and manual-retweet
 
 
 if __name__ == "__main__":
