@@ -15,7 +15,7 @@ KILL_SIGNAL = 0
 
 class Telegram_Bot(object):
 
-    def __init__(self, twitter_api, dirpath,level):
+    def __init__(self, twitter_api, dirpath,level, isretweet, manual_tweet):
         self.dirpath = dirpath
         self.twitter_api = twitter_api
         self.level = level
