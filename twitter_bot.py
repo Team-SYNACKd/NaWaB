@@ -74,7 +74,7 @@ class Twitter_Bot(object):
 
     def nawab_check_tweet(self, tweet_id):
         tid = pd.read_csv(self.dirpath + 'tid_store.csv')
-        if any(Id["Id"] == tweet_id for index, Id in tid.iterrows()):
+        if any(tid_store["Id"] == tweet_id for index, tid_store in tid.iterrows()):
             return True
         else:
             return False
@@ -89,8 +89,7 @@ class Twitter_Bot(object):
 
         if len(query) > 0:
             for line in query:
-                if self.level == 50 or self.level == 30:
-                    
+                if self.level == logging.CRITICAL or self.level == logging.WARNING:
                     with open(self.dirpath + "results.log", "a") as fp:
                         fp.write('INFO:' + time.strftime("%m/%d/%Y %I:%M:%S %p ") + 
                                  "\t|starting new query search: \t" + line + "\n")
@@ -106,6 +105,10 @@ class Twitter_Bot(object):
                         text = tweets.full_text
 
                         if (self.nawab_check_tweet(id)) and ('RT @' in text):
+                            if self.level == logging.WARNING:
+                                with open(self.dirpath + "error.log", "a") as fp:
+                                    fp.write('ERROR:' + time.strftime("%m/%d/%Y %I:%M:%S %p ") + '\t|'+
+                                        str(id) + ' ' + " already exists in the database or it is a retweet\n")
                             self.nw_logger.logger(
                                 '\t|' + str(id) + 'already exists in the database or it is a retweet', 'error', 'Error')
                         else:
@@ -115,14 +118,14 @@ class Twitter_Bot(object):
                                 url = 'https://twitter.com/' + \
                                     user + '/status/' + str(id)
                                     
-                                if self.level == 50 or self.level == 30:
+                                if self.level == logging.CRITICAL or self.level == logging.WARNING:
                                     with open(self.dirpath + "results.log", "a") as fp:
                                         fp.write('INFO:' + time.strftime("%m/%d/%Y %I:%M:%S %p ") + '\t|' + url + '\n')
                                         
                                 self.nw_logger.logger(
                                     '\t|' + url + '\n', 'info', 'Results')
                                 
-                    if self.level == 50 or self.level == 30:
+                    if self.level == logging.CRITICAL or self.level == logging.WARNING:
                          with open(self.dirpath + "results.log", "a") as fp:
                             fp.write('INFO:' + time.strftime("%m/%d/%Y %I:%M:%S %p ") + "\t|Id: " + str(id) +
                                  " is stored to the db from this iteration \n")
@@ -131,18 +134,18 @@ class Twitter_Bot(object):
                         '\t|Id: ' + str(id) + 'is stored to the db from this iteration', 'info', 'Results')
 
                 except tweepy.TweepError as e:
-                    if self.level == 50:
+                    if self.level == logging.CRITICAL:
                         with open(self.dirpath + "error.log", "a") as fp:
                             fp.write('ERROR:' + time.strftime("%m/%d/%Y %I:%M:%S %p ") + "\t|Tweepy failed at " + str(id) +
-                                 " because of " + e.reason + "\n")
+                                ' ' +  " because of " + e.reason + "\n")
                     self.nw_logger.logger(
                         '\t|Tweepy failed at ' + str(id) + 'because of' + e.reason, 'error', 'Error')
                     pass
 
     def nawab_retweet_tweet(self, api):
         tid = pd.read_csv(self.dirpath + 'tid_store.csv')
-        for index, Id in tid.iterrows():
-            tweet_id = int(Id['Id'])
+        for index, tid_store in tid.iterrows():
+            tweet_id = int(tid_store['Id'])
             try:
                 u = api.get_status(id=tweet_id)
                 rt_username = u.author.screen_name
@@ -150,11 +153,21 @@ class Twitter_Bot(object):
                 time.sleep(60)
                 retweet_url = 'https://twitter.com/' + \
                     rt_username + '/status/' + str(tweet_id)
+                if self.level == logging.CRITICAL or self.level == logging.WARNING:
+                        with open(self.dirpath + "results.log", "a") as fp:
+                            fp.write('INFO:' + time.strftime("%m/%d/%Y %I:%M:%S %p ") + "\t|Nawab retweeted " +
+                                 str(tweet_id) + " successfully \n")
+                            
 
                 self.nw_logger.logger('\t|Nawab retweeted' +
                                         str(tweet_id) + 'successfully', 'info', 'Results')
 
             except tweepy.TweepError as e:
+                if self.level == logging.CRITICAL:
+                        with open(self.dirpath + "error.log", "a") as fp:
+                            fp.write('ERROR:' + time.strftime("%m/%d/%Y %I:%M:%S %p ") + "\t|Tweepy failed to retweet after reading from the store of id " +
+                                    str(tweet_id) +  ' ' +" because of " + e.reason + "\n")
+
                 self.nw_logger.logger('\t|Tweepy failed to retweet after reading from the store of id ' +
-                                        str(tweet_id) + 'because of' + e.reason, 'error', 'Error')
+                                        str(tweet_id) + ' ' + 'because of' + e.reason, 'error', 'Error')
                 pass
