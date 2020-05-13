@@ -48,13 +48,13 @@ class Twitter_Bot(object):
 
     def isUserwhitelisted(self, userName):
         ### Search if the Whitelist user is in file
-        if not any(acc["Whitelist"] == userName.lower() for index, acc in self.data.iterrows()):
+        if  any(acc["Whitelist"] == userName.lower() for index, acc in self.data.iterrows()):
             return True
         return False
 
-    def isUserBanned(self, userName):
-        ### Search if the Blacklisted user is in file
-        if not any(acc["Blacklist"] == userName.lower() for index, acc in self.data.iterrows()):
+    def isUserBanned(self, userName, admin_user):
+        ### Search if the Blacklisted user is in file,and blacklist the bot's account
+        if not any((acc["Blacklist"] == userName.lower()) or (admin_user==userName.lower()) for index, acc in self.data.iterrows()):
             return True
         return False
 
@@ -78,7 +78,7 @@ class Twitter_Bot(object):
             return True
         else:
             return False
-
+    
     def nawab_curate_list(self, api):
         query = self.nawab_read_list()
         self.nawab_search(api, query)
@@ -103,6 +103,9 @@ class Twitter_Bot(object):
                         user = tweets.user.screen_name
                         id = tweets.id
                         text = tweets.full_text
+                        ## obtain user account for blacklist
+                        admin = api.me()
+                        admin_user = admin.screen_name
 
                         if (self.nawab_check_tweet(id)) and ('RT @' in text):
                             if self.level == logging.WARNING:
@@ -112,7 +115,7 @@ class Twitter_Bot(object):
                             self.nw_logger.logger(
                                 '\t|' + str(id) + 'already exists in the database or it is a retweet', 'error', 'Error')
                         else:
-                            if (self.isUserwhitelisted(user) or (self.isUserBanned(user) and self.isSafeKeyword(text))):
+                            if (self.isUserwhitelisted(user) or (self.isUserBanned(user,admin_user) and self.isSafeKeyword(text))):
                                 if not (self.nawab_check_tweet(id)):
                                     self.nawab_store_id(id)
                                 url = 'https://twitter.com/' + \
@@ -158,7 +161,6 @@ class Twitter_Bot(object):
                             fp.write('INFO:' + time.strftime("%m/%d/%Y %I:%M:%S %p ") + "\t|Nawab retweeted " +
                                  str(tweet_id) + " successfully \n")
                             
-
                 self.nw_logger.logger('\t|Nawab retweeted' +
                                         str(tweet_id) + 'successfully', 'info', 'Results')
 
