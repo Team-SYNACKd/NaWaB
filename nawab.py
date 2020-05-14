@@ -6,6 +6,7 @@ import os
 import threading
 import argparse
 import logging
+import datetime
 
 #TODO: Shouldn't import this here. Need a way to derive this from tg_bot instead.
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, ConversationHandler
@@ -32,9 +33,9 @@ class Nawab(object):
             tw_bot.nawab_retweet_tweet(api)
 
 
-    def tg_bot_run(self, auto_retweet=None):
+    def tg_bot_run(self, date, auto_retweet=None):
         tw_bot, api = self.retrieve_twitter_auth()
-        bot = tg_bot.Telegram_Bot(api, self.dirpath, self.level, auto_retweet)
+        bot = tg_bot.Telegram_Bot(api, self.dirpath, self.level, auto_retweet, date)
         updater = bot.nawab_tg_authenticate()
 
         dp = updater.dispatcher
@@ -61,6 +62,8 @@ def main():
     parser.add_argument("-r", "--retweet", help="Retweet all tweets automatically, doesn't spawn a telegram bot",
                         action='store_true', required=False)
     parser.add_argument("-b", "--blacklist",type=list, required=False, help="Blacklist the given username")
+    parser.add_argument('-d','--date', type=lambda s: datetime.datetime.strptime(s, '%m/%d/%Y'),
+                        required=True, help="Enter the date&time['MM/DD/YYYY HH:MM:SS'] from which the tweets has to be shown on telegram bot.")
     parser.add_argument("-p", "--path", type=str, required=False,
                         help="Path where the log files be stored. Note to create directory in that path beforehand.")
     parser.add_argument('-V', '--verbose',action="store_const", const=20)
@@ -114,9 +117,9 @@ def main():
     while thread.is_alive:
         #Initiate telegram bot
         if args['retweet']:
-            nawab.tg_bot_run(args['retweet'])
+            nawab.tg_bot_run( args['date'], args['retweet'])
         else:
-            nawab.tg_bot_run()
+            nawab.tg_bot_run(args['date'])
 
 
 if __name__ == "__main__":

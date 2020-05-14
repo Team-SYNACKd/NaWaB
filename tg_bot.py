@@ -7,6 +7,7 @@ import tweepy
 import time
 import nawab_logger
 import pandas as pd
+import datetime
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, ConversationHandler
@@ -15,10 +16,11 @@ KILL_SIGNAL = 0
 
 class Telegram_Bot(object):
 
-    def __init__(self, twitter_api, dirpath, level, auto_retweet):
+    def __init__(self, twitter_api, dirpath, level, search_date,  auto_retweet):
         self.dirpath = dirpath
         self.twitter_api = twitter_api
         self.level = level
+        self.search_date = search_date
         self.nw_logger = nawab_logger.Nawab_Logging(dirpath, level)
         self.auto_retweet = auto_retweet
 
@@ -50,7 +52,7 @@ class Telegram_Bot(object):
                 if self.level == logging.CRITICAL:
                         with open(self.dirpath + "error.log", "a") as fp:
                             fp.write('ERROR:' + time.strftime("%m/%d/%Y %I:%M:%S %p ") + "\t|Tweepy failed to get the status of the user from the " +
-                                 str(tid_store['Id']) + ' ' + ' because of ' + e.reason + "\n")
+                                str(tid_store['Id']) + ' ' + ' because of ' + e.reason + "\n")
                 self.nw_logger.logger('\t|Tweepy failed to get the status of the user from the ' +
                                         str(tid_store['Id']) + ' ' + ' because of ' + e.reason + '\n\n', 'error', 'Error')
                 pass
