@@ -16,7 +16,7 @@ KILL_SIGNAL = 0
 
 class Telegram_Bot(object):
 
-    def __init__(self, twitter_api, dirpath, level, search_date,  auto_retweet):
+    def __init__(self, twitter_api, dirpath, level, auto_retweet, search_date):
         self.dirpath = dirpath
         self.twitter_api = twitter_api
         self.level = level
@@ -44,34 +44,36 @@ class Telegram_Bot(object):
         global KILL_SIGNAL
         tid = pd.read_csv(self.dirpath + 'tid_store.csv')
         for index, tid_store in tid.iterrows():
-            
-            try:
-                u = self.twitter_api.get_status(id=tid_store['Id'])
-                username = u.author.screen_name
-            except tweepy.TweepError as e:
-                if self.level == logging.CRITICAL:
-                        with open(self.dirpath + "error.log", "a") as fp:
-                            fp.write('ERROR:' + time.strftime("%m/%d/%Y %I:%M:%S %p ") + "\t|Tweepy failed to get the status of the user from the " +
-                                str(tid_store['Id']) + ' ' + ' because of ' + e.reason + "\n")
-                self.nw_logger.logger('\t|Tweepy failed to get the status of the user from the ' +
-                                        str(tid_store['Id']) + ' ' + ' because of ' + e.reason + '\n\n', 'error', 'Error')
-                pass
-            url = 'https://twitter.com/' + \
-                username + '/status/' + str(tid_store['Id'])
-                
-            if (job.context in config.tg_admin_id) and (self.auto_retweet == False or self.auto_retweet == None):
-                keyboard = [[InlineKeyboardButton("Retweet", callback_data=int(tid_store['Id'])),InlineKeyboardButton("View", url=url)]]
-                reply_markup = InlineKeyboardMarkup(keyboard)
-            else:
-                keyboard = [[InlineKeyboardButton(
-                    "View", url=url)]]
-                reply_markup = InlineKeyboardMarkup(keyboard)
-            if KILL_SIGNAL == 0:
-                context.bot.send_message(job.context, text=str(url), reply_markup = reply_markup)
-                #time.sleep(10)
-            else:
-                KILL_SIGNAL = 0
-                break
+            ##convert the string to datetime format for comparison
+            tid_date = datetime.datetime.strptime((tid_store['Datetime']).strip(), '%m/%d/%Y %H:%M:%S %p')
+            if (tid_date.date() >= self.search_date.date()) or (tid_date >= self.search_date):
+                try:
+                    u = self.twitter_api.get_status(id=tid_store['Id'])
+                    username = u.author.screen_name
+                except tweepy.TweepError as e:
+                    if self.level == logging.CRITICAL:
+                            with open(self.dirpath + "error.log", "a") as fp:
+                                fp.write('ERROR:' + time.strftime("%m/%d/%Y %I:%M:%S %p ") + "\t|Tweepy failed to get the status of the user from the " +
+                                    str(tid_store['Id']) + ' ' + ' because of ' + e.reason + "\n")
+                    self.nw_logger.logger('\t|Tweepy failed to get the status of the user from the ' +
+                                            str(tid_store['Id']) + ' ' + ' because of ' + e.reason + '\n\n', 'error', 'Error')
+                    pass
+                url = 'https://twitter.com/' + \
+                    username + '/status/' + str(tid_store['Id'])
+                    
+                if (job.context in config.tg_admin_id) and (self.auto_retweet == False or self.auto_retweet == None):
+                    keyboard = [[InlineKeyboardButton("Retweet", callback_data=int(tid_store['Id'])),InlineKeyboardButton("View", url=url)]]
+                    reply_markup = InlineKeyboardMarkup(keyboard)
+                else:
+                    keyboard = [[InlineKeyboardButton(
+                        "View", url=url)]]
+                    reply_markup = InlineKeyboardMarkup(keyboard)
+                if KILL_SIGNAL == 0:
+                    context.bot.send_message(job.context, text=str(url), reply_markup = reply_markup)
+                    #time.sleep(10)
+                else:
+                    KILL_SIGNAL = 0
+                    break
 
 
     def start(self, update, context):
