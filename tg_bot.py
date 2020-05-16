@@ -36,7 +36,10 @@ class Telegram_Bot(object):
         update.message.reply_text(text=text, reply_markup=reply_markup)
 
     def display_tweet(self, context):
-        print('starting display parameter')
+        if self.level == logging.CRITICAL or self.level == logging.WARNING:
+             with open(self.dirpath + "results.log", "a") as fp:
+                 fp.write('INFO:' + time.strftime("%m/%d/%Y %I:%M:%S %p ") + '\t|' +'starting display parameter' + '\n')
+        self.nw_logger.logger('\t|starting display parameter', 'info', 'Results')
         job = context.job
         global KILL_SIGNAL
         tid = pd.read_csv(self.dirpath + 'tid_store.csv')
@@ -73,15 +76,21 @@ class Telegram_Bot(object):
                 break
 
     def start(self, update, context):
-        print('starting bot')
+        if self.level == logging.CRITICAL or self.level == logging.WARNING:
+             with open(self.dirpath + "results.log", "a") as fp:
+                 fp.write('INFO:' + time.strftime("%m/%d/%Y %I:%M:%S %p ") + '\t|' +'starting bot' + '\n')
+        self.nw_logger.logger('\t|starting bot', 'info', 'Results')
         chat_id = int(update.message.chat_id)
         try:
             if 'job' in context.chat_data:
                 old_job = context.chat_data['job']
                 old_job.schedule_removal()
-            new_job = context.job_queue.run_once(
-                self.display_tweet, 2, context=chat_id)
-            print("new job %s", new_job)
+            new_job = context.job_queue.run_once(self.display_tweet, 2, context=chat_id)
+            if self.level == logging.CRITICAL or self.level == logging.WARNING:
+             with open(self.dirpath + "results.log", "a") as fp:
+                 fp.write('INFO:' + time.strftime("%m/%d/%Y %I:%M:%S %p ") 
+                          + '\t|' +'new job ' +  new_job + '\n')
+            self.nw_logger.logger('\t|new job ' +  new_job , 'info', 'Results')
             context.chat_data['job'] = new_job
             update.message.reply_text('successfully started!')
         except (IndexError, ValueError):
@@ -104,7 +113,7 @@ class Telegram_Bot(object):
                              str(data) + ' ' + ' because of ' + e.reason + "\n")
 
             self.nw_logger.logger('\t|Tweepy failed to retweet after reading from the store of id ' +
-                                  str(data) + ' ' + ' because of ' + e.reason + '\n\n', 'error', 'Error')
+                                str(data) + ' ' + ' because of ' + e.reason + '\n', 'error', 'Error')
             pass
         try:
             u = self.twitter_api.get_status(id=int(data))
@@ -113,9 +122,9 @@ class Telegram_Bot(object):
             if self.level == logging.CRITICAL:
                 with open(self.dirpath + "error.log", "a") as fp:
                     fp.write('ERROR:' + time.strftime("%m/%d/%Y %I:%M:%S %p ") + "\t|Tweepy failed to get the status of the user from the " +
-                             str(data) + ' ' + ' because of ' + e.reason + '\n\n')
+                                    str(data) + ' ' + ' because of ' + e.reason + '\n')
             self.nw_logger.logger('\t|Tweepy failed to get the status of the user from the ' +
-                                  str(data) + ' ' + ' because of ' + e.reason + '\n\n', 'error', 'Error')
+                                    str(data) + ' ' + ' because of ' + e.reason + '\n', 'error', 'Error')
             pass
         url = 'https://twitter.com/' + \
             username + '/status/' + str(data)
@@ -130,11 +139,10 @@ class Telegram_Bot(object):
         if self.level == logging.CRITICAL:
             with open(self.dirpath + "error.log", "a") as fp:
                 fp.write('ERROR:' + time.strftime("%m/%d/%Y %I:%M:%S %p ") +
-                         '\t|Update' + update + 'caused error ' + context.error + '\n\n')
-
+                          '\t|Update' + update + 'caused error ' + context.error + '\n')
         self.nw_logger.logger(
-            '\t|Update' + update + 'caused error ' + context.error + '\n\n', 'error', 'Error')
-
+            '\t|Update' + update + 'caused error ' + context.error + '\n', 'error', 'Error')
+    
     def stop(self, update, context):
         if 'job' not in context.chat_data:
             update.message.reply_text('You have not activated the bot yet!')
