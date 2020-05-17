@@ -10,8 +10,8 @@ class Nawab_Logging(object):
      ##setting up the logger
     def setup_logger(self, logger_name, log_file, level=logging.INFO):
         log_setup = logging.getLogger(logger_name)
-        formatter = logging.Formatter(
-            '%(levelname)s: %(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p')
+        formatter = logging.Formatter(fmt=
+                '%(asctime)s, %(levelname)-4s %(message)s', datefmt='%Y-%m-%d %I:%M:%S %p')
         fileHandler = logging.FileHandler(log_file, mode='a')
         fileHandler.setFormatter(formatter)
         streamHandler = logging.StreamHandler()
