@@ -3,6 +3,7 @@ import tg_bot
 import pandas as pd
 import pwd
 import os
+import sys
 import threading
 import argparse
 import logging
@@ -45,11 +46,17 @@ class Nawab(object):
         dp.add_error_handler(bot.error)
 
         # Start the Bot
-        updater.start_polling()
 
         # Run the bot until the user presses Ctrl-C or the process receives SIGINT,
         # SIGTERM or SIGABRT
-        updater.idle()
+        try:
+            updater.start_polling()
+        except KeyboardInterrupt:
+            try:
+                sys.exit(1)
+            except SystemExit:
+                os._exit(1)
+
 
 
 def wrapper(func, args, res):
@@ -119,5 +126,11 @@ def main():
             nawab.tg_bot_run()
 
 
-if __name__ == "__main__":
-    main()
+if __name__ == '__main__':
+    try:
+        main()
+    except KeyboardInterrupt:
+        try:
+            sys.exit(1)
+        except SystemExit:
+            os._exit(1)
