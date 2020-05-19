@@ -48,13 +48,13 @@ class Twitter_Bot(object):
 
     def isUserwhitelisted(self, userName):
         ### Search if the Whitelist user is in file
-        if  any(acc["Whitelist"] == userName.lower() for index, acc in self.data.iterrows()):
+        if  any(str(acc["Whitelist"]).lower() == userName.lower() for index, acc in self.data.iterrows()):
             return True
         return False
 
     def isUserBanned(self, userName, admin_user):
         ### Search if the Blacklisted user is in file,and blacklist the bot's account
-        if not any((acc["Blacklist"] == userName.lower()) or (admin_user==userName.lower()) for index, acc in self.data.iterrows()):
+        if not any((str(acc["Blacklist"]).lower() == userName.lower()) or (admin_user.lower()==userName.lower()) for index, acc in self.data.iterrows()):
             return True
         return False
 
@@ -62,7 +62,7 @@ class Twitter_Bot(object):
 
     def isSafeKeyword(self, tweetText):
         ### Search if tweettext is safe
-        if not any(word["Banwords"] == tweetText.lower() for index, word in self.data.iterrows()):
+        if not any(str(word["Banwords"]).lower() in tweetText.lower() for index, word in self.data.iterrows()):
             return True
         return False
 
