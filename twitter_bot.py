@@ -90,7 +90,7 @@ class Twitter_Bot(object):
         for line in query:
             key = str(line).strip('#')
             if key in text:
-                cnt+=1
+                cnt+=text.count(key)
         return cnt
 
     def nawab_check_tweet(self, tweet_id):
@@ -128,7 +128,7 @@ class Twitter_Bot(object):
                         admin = api.me()
                         admin_user = admin.screen_name
                         ## minimum no of keywords required
-                        min_freq = 3 
+                        min_freq = 2 
 
                         if (self.nawab_check_tweet(id)) and ('RT @' in text):
                             if self.level == logging.WARNING:
