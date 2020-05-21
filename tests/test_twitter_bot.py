@@ -3,6 +3,7 @@ import sys
 sys.path.append('../')
 import twitter_bot
 import pandas as pd
+import tweepy
 
 
 class TestTwitter_Bot(unittest.TestCase):
@@ -18,7 +19,9 @@ class TestTwitter_Bot(unittest.TestCase):
     def setUp(self):       ## create and use (__init__)
         print('setUp')
         self.data = pd.read_csv('../data.csv')
-        self.tw1 = twitter_bot.Twitter_Bot('/var/log/nawab/',self.data,20)
+        self.dirpath = '/var/log/nawab/'
+        self.tw1 = twitter_bot.Twitter_Bot(self.dirpath,self.data,20)
+        self.api = self.tw1.nawab_twitter_authenticate()
         
     def tearDown(self):     ## destroy(destructor of object)
         print('tearDown\n')
@@ -52,3 +55,17 @@ class TestTwitter_Bot(unittest.TestCase):
         tweet_text4 = "iPhone SE delivery times suggest supply has caught up with demand of xvideo"
         self.assertEqual(self.tw1.isSafeKeyword(tweet_text3),True)
         self.assertEqual(self.tw1.isSafeKeyword(tweet_text4),False)
+        
+    def test_tweet_url(self):
+        
+        """produce the tweek url from tid_store """
+        api = self.tw1.nawab_twitter_authenticate()
+        tid_store = pd.read_csv(self.dirpath + 'tid_store.csv') 
+        for index, tid in tid_store.iterrows():
+            try:
+                User = api.get_status(id=tid['Id'])
+                username = User.author.screen_name
+                url = "https://twitter.com/" + username + "/status/" + str(tid['Id'])
+                print(url)
+            except tweepy.TweepError as e:
+                print("The provided url doesn't exist due to" +  e.reason)
