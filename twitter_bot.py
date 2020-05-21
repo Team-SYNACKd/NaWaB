@@ -83,10 +83,12 @@ class Twitter_Bot(object):
         return False
 
     def nawab_get_id(self):
-        ### Read the last retweeted id from a file
-        tid = pd.read_csv(self.dirpath + 'tid_store.csv')
-        last = tid['Id'].iloc[-1]
-        return last
+        ### Read the  retweeted id from tid_store
+        id_list = []
+        tid_store = pd.read_csv(self.dirpath + 'tid_store.csv') 
+        for index, tid in tid_store.iterrows():
+           id_list.append(tid['Id'])
+        return id_list 
 
     def nawab_check_relevant(self, query, text):
         """Check for count of keywords in text"""
