@@ -87,6 +87,20 @@ class Twitter_Bot(object):
         tid_store = pd.read_csv('tid_store.csv')
         return tid_store['Id']  
 
+    def nawab_find_prev_date(self):
+        """to find the previous date in the tid"""
+        tid = pd.read_csv(self.dirpath + 'tid_store.csv')
+        tid["Date_time"]= pd.to_datetime(tid["Date_time"])
+        previous_date = tid['Date_time'].iloc[-1]
+        #find the previous date by iterating tid_store bottom-up 
+        for index, tid_store in tid[::-1].iterrows():
+            scrape_datetime = tid_store['Date_time']
+            scrape_date = date(scrape_datetime.year, scrape_datetime.month, scrape_datetime.day)
+            if scrape_date!=previous_date:
+                previous_date = scrape_date
+                break;
+        return previous_date
+
     def nawab_check_relevant(self, query, text):
         """Check for count of keywords in text"""
         cnt = 0

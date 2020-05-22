@@ -32,7 +32,7 @@ class Nawab(object):
 
     def tg_bot_run(self, auto_retweet=None):
         tw_bot, api = self.retrieve_twitter_auth()
-        bot = tg_bot.Telegram_Bot(api, self.dirpath, self.level, auto_retweet)
+        bot = tg_bot.Telegram_Bot(api, self.dirpath, self.data, self.level, auto_retweet)
         updater = bot.nawab_tg_authenticate()
 
         dp = updater.dispatcher
