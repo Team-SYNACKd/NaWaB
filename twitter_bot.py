@@ -84,11 +84,8 @@ class Twitter_Bot(object):
 
     def nawab_get_id(self):
         ### Read the  retweeted id from tid_store
-        id_list = []
-        tid_store = pd.read_csv(self.dirpath + 'tid_store.csv') 
-        for index, tid in tid_store.iterrows():
-           id_list.append(tid['Id'])
-        return id_list 
+        tid_store = pd.read_csv('tid_store.csv')
+        return tid_store['Id']  
 
     def nawab_check_relevant(self, query, text):
         """Check for count of keywords in text"""
@@ -100,8 +97,8 @@ class Twitter_Bot(object):
         return cnt
 
     def nawab_check_tweet(self, tweet_id):
-        tid = pd.read_csv(self.dirpath + 'tid_store.csv')
-        if any(tid_store["Id"] == tweet_id for index, tid_store in tid.iterrows()):
+        tid_store = self.nawab_get_id()
+        if any(tid == tweet_id for tid in tid_store):
             return True
         else:
             return False
@@ -182,14 +179,13 @@ class Twitter_Bot(object):
                     pass
 
     def nawab_retweet_tweet(self, api):
-        tid = pd.read_csv(self.dirpath + 'tid_store.csv')
-        for index, tid_store in tid.iterrows():
-            tweet_id = int(tid_store['Id'])
+        tid_store = self.nawab_get_id()
+        for tid in tid_store:
+            tweet_id = int(tid)
             try:
                 u = api.get_status(id=tweet_id)
                 rt_username = u.author.screen_name
                 api.retweet(tweet_id)
-                time.sleep(60)
                 retweet_url = 'https://twitter.com/' + \
                     rt_username + '/status/' + str(tweet_id)
                 if self.level == logging.CRITICAL or self.level == logging.WARNING:
@@ -197,7 +193,7 @@ class Twitter_Bot(object):
                             fp.write(time.strftime("%Y-%m-%d %I:%M:%S %p") + ',' +  ' INFO ' + 'Twitter_Bot ' +
                                      "Nawab retweeted " + str(tweet_id) + " successfully \n")
                             
-                self.nw_logger.logger('Twitter_Bot' +' Nawab retweeted ' +
+                self.nw_logger.logger('Twitter_Bot' + ' Nawab retweeted ' +
                                         str(tweet_id) + ' successfully', 'info', 'Results')
 
             except tweepy.TweepError as e:
