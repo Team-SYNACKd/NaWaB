@@ -8,6 +8,7 @@ import time
 import nawab_logger
 import pandas as pd
 
+from datetime import timedelta, datetime, date
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, ConversationHandler
 
@@ -40,8 +41,23 @@ class Telegram_Bot(object):
         job = context.job
         global KILL_SIGNAL
         tid = pd.read_csv(self.dirpath + 'tid_store.csv')
-        for index, tid_store in tid.iterrows():
-
+        tid["Date_time"]= pd.to_datetime(tid["Date_time"])
+        previous_date = tid['Date_time'].iloc[-1]
+        
+        #to find the previous date in the tid
+        for index, tid_store in tid[::-1].iterrows():
+            scrape_datetime = tid_store['Date_time']
+            scrape_date = date(scrape_datetime.year, scrape_datetime.month, scrape_datetime.day)
+            if scrape_date!=previous_date:
+                previous_date = scrape_date
+                break
+            else:
+                continue
+        
+        for index, tid_store in tid[::-1].iterrows():
+            scrape_date = tid_store['Date_time']
+            if scrape_date<=previous_date:
+                break
             try:
                 u = self.twitter_api.get_status(id=tid_store['Id'])
                 username = u.author.screen_name

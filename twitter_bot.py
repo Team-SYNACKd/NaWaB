@@ -6,7 +6,7 @@ import tweepy
 import mmap
 import time
 import random
-from datetime import date
+from datetime import date, datetime
 import csv
 import os
 import logging
@@ -48,13 +48,13 @@ class Twitter_Bot(object):
     def nawab_store_id(self, tweet_id, isrelevant):
         ### Store a tweet id in a file
         if isrelevant:
-            dicts = {'Date_time': [time.strftime("%m/%d/%Y %I:%M:%S %p")],
+            dicts = {'Date_time': [datetime.now()],
                      'Id': [str(tweet_id)]}
             data = pd.DataFrame(dicts)
             data.to_csv(self.dirpath + 'tid_store.csv',
                         mode='a', header=False, index=False)
         else:
-            dicts = {'Date_time': [time.strftime("%m/%d/%Y %I:%M:%S %p")],
+            dicts = {'Date_time': [datetime.now()],
                      'Id': [str(tweet_id)]}
             data = pd.DataFrame(dicts)
             data.to_csv(self.dirpath + 'backup_tid_store.csv',
