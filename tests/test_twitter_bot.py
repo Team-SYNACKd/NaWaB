@@ -47,6 +47,7 @@ class TestTwitter_Bot(unittest.TestCase):
         """ Check for Banned user"""
         self.assertEqual(self.tw1.isUserBanned("Ananthan2k","Ananthan2k"),False)
         self.assertEqual(self.tw1.isUserBanned("Pornhub","Ananthan2k"),False)
+        self.assertEqual(self.tw1.isUserBanned("Ananthan2k","Jim34"),True)
         
     def test_isSafeword(self):
         

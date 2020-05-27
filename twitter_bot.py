@@ -171,7 +171,7 @@ class Twitter_Bot(object):
                                                 fp.write(time.strftime("%Y-%m-%d %I:%M:%S %p") + "," + ' INFO ' + 'Twitter_Bot ' + "Id: " + str(id) +
                                                          " is not a relevant tweet and is stored to the db from this iteration \n")
                                         self.nw_logger.logger('Twitter_Bot ' +
-                                                              'Id: ' + str(id) + 'is not a relevant tweet and will not be  from this iteration', 'info', 'Results')
+                                                              'Id: ' + str(id) + ' is not a relevant tweet and will not be  from this iteration', 'info', 'Results')
                                         self.nawab_store_id(id, False)
                                 url = 'https://twitter.com/' + \
                                     user + '/status/' + str(id)

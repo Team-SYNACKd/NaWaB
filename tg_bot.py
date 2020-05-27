@@ -40,9 +40,13 @@ class Telegram_Bot(object):
         update.message.reply_text(text=text, reply_markup=reply_markup)
 
     def display_tweet(self, context):
-        print('starting display parameter')
         job = context.job
         global KILL_SIGNAL
+        if self.level == logging.CRITICAL or self.level == logging.WARNING:
+             with open(self.dirpath + "results.log", "a") as fp:
+                 fp.write(time.strftime("%Y-%m-%d %I:%M:%S %p") + ',' +  ' INFO ' + 'Telegram_Bot '
+                           + 'starting display parameter' + '\n')
+        self.nw_logger.logger('Telegram_Bot starting display parameter', 'info', 'Results')
 
         # the previous date from which the tweets need to be sent
         previous_date = self.tw_bot.nawab_find_prev_date()
@@ -59,10 +63,11 @@ class Telegram_Bot(object):
             except tweepy.TweepError as e:
                 if self.level == logging.CRITICAL:
                         with open(self.dirpath + "error.log", "a") as fp:
-                            fp.write('ERROR:' + time.strftime("%m/%d/%Y %I:%M:%S %p ") + "\t|Tweepy failed to get the status of the user from the " +
-                                     str(tid_store['Id']) + ' ' + ' because of ' + e.reason + "\n")
-                self.nw_logger.logger('\t|Tweepy failed to get the status of the user from the ' +
-                                      str(tid_store['Id']) + ' ' + ' because of ' + e.reason + '\n\n', 'error', 'Error')
+                            fp.write(time.strftime("%Y-%m-%d %I:%M:%S %p") + ',' +  ' ERROR ' + 'Telegram_Bot ' +
+                                      "Tweepy failed to get the status of the user from the " +
+                                 str(tid_store['Id']) +  ' because of ' + e.reason + "\n")
+                self.nw_logger.logger('Telegram_Bot Tweepy failed to get the status of the user from the ' +
+                                        str(tid_store['Id'])  + ' because of ' + e.reason, 'error', 'Error')
                 pass
             url = 'https://twitter.com/' + \
                 username + '/status/' + str(tid_store['Id'])
@@ -93,9 +98,13 @@ class Telegram_Bot(object):
                 old_job.schedule_removal()
             new_job = context.job_queue.run_once(
                 self.display_tweet, 2, context=chat_id)
-            print("new job %s", new_job)
             context.chat_data['job'] = new_job
             update.message.reply_text('Successfully started!')
+            if self.level == logging.CRITICAL or self.level == logging.WARNING:
+                with open(self.dirpath + "results.log", "a") as fp:
+                    fp.write(time.strftime("%Y-%m-%d %I:%M:%S %p") + ',' +  ' INFO ' + 'Telegram_Bot '
+                                + 'new job ' +  str(new_job) + '\n')
+            self.nw_logger.logger('Telegram_Bot  new job ' +  str(new_job) , 'info', 'Results')
         except (IndexError, ValueError):
             update.message.reply_text('Did you /start yet?')
 
@@ -112,22 +121,22 @@ class Telegram_Bot(object):
 
             if self.level == logging.CRITICAL:
                 with open(self.dirpath + "error.log", "a") as fp:
-                    fp.write('ERROR:' + time.strftime("%m/%d/%Y %I:%M:%S %p ") + "\t|Tweepy failed to retweet after reading from the store of id " +
-                             str(data) + ' ' + ' because of ' + e.reason + "\n")
+                    fp.write(time.strftime("%Y-%m-%d %I:%M:%S %p") + ',' +  ' ERROR ' + 'Telegram_Bot '  
+                             + "Tweepy failed to retweet after reading from the store of id " +
+                         str(data) +  ' because of ' + e.reason + "\n")
 
-            self.nw_logger.logger('\t|Tweepy failed to retweet after reading from the store of id ' +
-                                  str(data) + ' ' + ' because of ' + e.reason + '\n\n', 'error', 'Error')
+            self.nw_logger.logger('Telegram_Bot' + ' Tweepy failed to retweet after reading from the store of id ' +
+                                str(data)  + ' because of ' + e.reason, 'error', 'Error')
             pass
         try:
             u = self.twitter_api.get_status(id=int(data))
             username = u.author.screen_name
         except tweepy.TweepError as e:
-            if self.level == logging.CRITICAL:
-                with open(self.dirpath + "error.log", "a") as fp:
-                    fp.write('ERROR:' + time.strftime("%m/%d/%Y %I:%M:%S %p ") + "\t|Tweepy failed to get the status of the user from the " +
-                             str(data) + ' ' + ' because of ' + e.reason + '\n\n')
-            self.nw_logger.logger('\t|Tweepy failed to get the status of the user from the ' +
-                                  str(data) + ' ' + ' because of ' + e.reason + '\n\n', 'error', 'Error')
+            fp.write(time.strftime("%Y-%m-%d %I:%M:%S %p") + ',' + ' ERROR ' + 'Telegram_Bot ' +
+                              "Tweepy failed to get the status of the user from the " +
+                                    str(data) + ' because of ' + e.reason + '\n')
+            self.nw_logger.logger('Telegram_Bot' + ' Tweepy failed to get the status of the user from the ' +
+                                    str(data)  + ' because of ' + e.reason, 'error', 'Error')
             pass
         url = 'https://twitter.com/' + \
             username + '/status/' + str(data)
@@ -141,12 +150,11 @@ class Telegram_Bot(object):
         """Log Errors caused by Updates."""
         if self.level == logging.CRITICAL:
             with open(self.dirpath + "error.log", "a") as fp:
-                fp.write('ERROR:' + time.strftime("%m/%d/%Y %I:%M:%S %p ") +
-                         '\t|Update' + update + 'caused error ' + context.error + '\n\n')
-
-        self.nw_logger.logger(
-            '\t|Update' + update + 'caused error ' + context.error + '\n\n', 'error', 'Error')
-
+                fp.write( time.strftime("%Y-%m-%d %I:%M:%S %p") + ',' +  ' ERROR ' + 'Telegram_Bot ' +
+                          'Update ' + update + ' caused error ' + context.error + '\n')
+        self.nw_logger.logger('Telegram_Bot' +
+            ' Update' + update + 'caused error ' + context.error, 'error', 'Error')
+        
     def stop(self, update, context):
         if 'job' not in context.chat_data:
             update.message.reply_text('You have not activated the bot yet!')
