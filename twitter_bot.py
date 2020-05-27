@@ -82,11 +82,22 @@ class Twitter_Bot(object):
 
     def nawab_get_id(self):
         ### Read the  retweeted id from tid_store
-        id_list = []
-        tid_store = pd.read_csv(self.dirpath + 'tid_store.csv') 
-        for index, tid in tid_store.iterrows():
-           id_list.append(tid['Id'])
-        return id_list 
+        tid_store = pd.read_csv(self.dirpath + 'tid_store.csv')
+        return tid_store['Id']  
+
+    def nawab_find_prev_date(self):
+        """to find the previous date in the tid"""
+        tid = pd.read_csv(self.dirpath + 'tid_store.csv')
+        tid["Date_time"]= pd.to_datetime(tid["Date_time"])
+        previous_date = tid['Date_time'].iloc[-1]
+        #find the previous date by iterating tid_store bottom-up 
+        for index, tid_store in tid[::-1].iterrows():
+            scrape_datetime = tid_store['Date_time']
+            scrape_date = date(scrape_datetime.year, scrape_datetime.month, scrape_datetime.day)
+            if scrape_date!=previous_date:
+                previous_date = scrape_date
+                break
+        return previous_date
 
     def nawab_check_relevant(self, query, text):
         """Check for count of keywords in text"""
