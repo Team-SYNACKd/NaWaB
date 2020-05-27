@@ -7,6 +7,7 @@ import tweepy
 import time
 import nawab_logger
 import pandas as pd
+import twitter_bot
 
 from datetime import timedelta, datetime, date
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
@@ -17,12 +18,14 @@ KILL_SIGNAL = 0
 
 class Telegram_Bot(object):
 
-    def __init__(self, twitter_api, dirpath, level, auto_retweet):
+    def __init__(self, twitter_api, dirpath, data, level, auto_retweet):
         self.dirpath = dirpath
+        self.data = data
         self.twitter_api = twitter_api
         self.level = level
         self.nw_logger = nawab_logger.Nawab_Logging(dirpath, level)
         self.auto_retweet = auto_retweet
+        self.tw_bot = twitter_bot.Twitter_Bot(self.dirpath, self.data, self.level)
 
     def nawab_tg_authenticate(self):
         updater = Updater(token=config.tg_token, use_context=True)
@@ -40,23 +43,15 @@ class Telegram_Bot(object):
         print('starting display parameter')
         job = context.job
         global KILL_SIGNAL
+
+        # the previous date from which the tweets need to be sent
+        previous_date = self.tw_bot.nawab_find_prev_date()
         tid = pd.read_csv(self.dirpath + 'tid_store.csv')
-        tid["Date_time"]= pd.to_datetime(tid["Date_time"])
-        previous_date = tid['Date_time'].iloc[-1]
-        
-        #to find the previous date in the tid
-        for index, tid_store in tid[::-1].iterrows():
-            scrape_datetime = tid_store['Date_time']
-            scrape_date = date(scrape_datetime.year, scrape_datetime.month, scrape_datetime.day)
-            if scrape_date!=previous_date:
-                previous_date = scrape_date
-                break
-            else:
-                continue
-        
+        tid['Date_time'] = pd.to_datetime(tid['Date_time'])
+
         for index, tid_store in tid[::-1].iterrows():
             scrape_date = tid_store['Date_time']
-            if scrape_date<=previous_date:
+            if scrape_date < previous_date:
                 break
             try:
                 u = self.twitter_api.get_status(id=tid_store['Id'])
@@ -83,13 +78,14 @@ class Telegram_Bot(object):
             if KILL_SIGNAL == 0:
                 context.bot.send_message(job.context, text=str(
                     url), reply_markup=reply_markup)
-                #time.sleep(10)
+                time.sleep(1)
             else:
                 KILL_SIGNAL = 0
                 break
 
     def start(self, update, context):
-        print('starting bot')
+        global KILL_SIGNAL
+        KILL_SIGNAL = 0
         chat_id = int(update.message.chat_id)
         try:
             if 'job' in context.chat_data:
@@ -99,7 +95,7 @@ class Telegram_Bot(object):
                 self.display_tweet, 2, context=chat_id)
             print("new job %s", new_job)
             context.chat_data['job'] = new_job
-            update.message.reply_text('successfully started!')
+            update.message.reply_text('Successfully started!')
         except (IndexError, ValueError):
             update.message.reply_text('Did you /start yet?')
 
