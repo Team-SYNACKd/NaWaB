@@ -12,7 +12,6 @@ import os
 import logging
 import nawab_logger
 import pandas as pd
-import inspect
 
 
 
@@ -98,7 +97,7 @@ class Twitter_Bot(object):
             scrape_date = date(scrape_datetime.year, scrape_datetime.month, scrape_datetime.day)
             if scrape_date!=previous_date:
                 previous_date = scrape_date
-                break;
+                break
         return previous_date
 
     def nawab_check_relevant(self, query, text):
