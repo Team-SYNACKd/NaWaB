@@ -74,13 +74,13 @@ class Twitter_Bot(object):
             data.to_csv(self.dirpath + 'backup_tid_store.csv',
                         mode='a', header=False, index=False)
 
-    def isUserwhitelisted(self, userName):
+    def __isUserwhitelisted(self, userName):
         ### Search if the Whitelist user is in file
         if any(str(acc["Whitelist"]).lower() == userName.lower() for index, acc in self.data.iterrows()):
             return True
         return False
 
-    def isUserBanned(self, userName, admin_user):
+    def __isUserBanned(self, userName, admin_user):
         ### Search if the Blacklisted user is in file,and blacklist the bot's account
         if not any((str(acc["Blacklist"]).lower() == userName.lower()) or (admin_user.lower() == userName.lower()) for index, acc in self.data.iterrows()):
             return True
@@ -88,7 +88,7 @@ class Twitter_Bot(object):
 
     """Get banned words for a safer content tweets by nawab"""
 
-    def isSafeKeyword(self, tweetText):
+    def __isSafeKeyword(self, tweetText):
         ### Search if tweettext is safe
         if not any(str(word["Banwords"]).lower() in tweetText.lower() for index, word in self.data.iterrows()):
             return True
@@ -114,7 +114,7 @@ class Twitter_Bot(object):
                 break
         return previous_date
 
-    def nawab_check_relevant(self, query, text):
+    def __nawab_check_relevant(self, query, text):
         """Check for count of keywords in text"""
         cnt = 0
         for line in query:
@@ -123,7 +123,7 @@ class Twitter_Bot(object):
                 cnt += text.count(key)
         return cnt
 
-    def nawab_check_tweet(self, tweet_id):
+    def __nawab_check_tweet(self, tweet_id):
         tid_store = self.nawab_get_id()
         if any(tid == tweet_id for tid in tid_store):
             return True
@@ -159,7 +159,7 @@ class Twitter_Bot(object):
                         ## minimum no of keywords required
                         min_freq = 2
 
-                        if (self.nawab_check_tweet(id)) and ('RT @' in text):
+                        if (self.__nawab_check_tweet(id)) and ('RT @' in text):
                             if self.level == logging.WARNING:
                                 with open(self.dirpath + "error.log", "a") as fp:
                                     fp.write(time.strftime("%Y-%m-%d %I:%M:%S %p") +',' +  ' ERROR ' + 'Twitter_Bot ' +
@@ -167,10 +167,10 @@ class Twitter_Bot(object):
                             self.nw_logger.logger('Twitter_Bot ' +
                                 str(id) + ' already exists in the database or it is a retweet', 'error', 'Error')
                         else:
-                            if (self.isUserwhitelisted(user) or (self.isUserBanned(user, admin_user) and self.isSafeKeyword(text))):
-                                if not (self.nawab_check_tweet(id)):
+                            if (self.__isUserwhitelisted(user) or (self.__isUserBanned(user, admin_user) and self.__isSafeKeyword(text))):
+                                if not (self.__nawab_check_tweet(id)):
                                     ##check if it is a relevant tweet
-                                    if self.nawab_check_relevant(query, text) >= min_freq:
+                                    if self.__nawab_check_relevant(query, text) >= min_freq:
                                         if self.level == logging.CRITICAL or self.level == logging.WARNING:
                                             with open(self.dirpath + "results.log", "a") as fp:
                                                 fp.write(time.strftime("%Y-%m-%d %I:%M:%S %p") + "," + ' INFO ' + 'Twitter_Bot ' + "Id: " + str(id) +
