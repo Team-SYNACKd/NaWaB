@@ -44,14 +44,14 @@ class Twitter_Bot(object):
         """ To log all message to file"""
         if msg_type == 'error':
             if self.level == logging.CRITICAL:
-                with open("error.log", "a") as fp:
-                    fp.write(time.strftime("%Y-%m-%d %I:%M:%S %p") +',' +  ' ERROR ' + 'Twitter_Bot ' + msg + "\n")
-            self.nw_logger.logger('Twitter_Bot' + msg, 'error', 'error')
+                with open(self.dirpath + "error.log", "a") as fp:
+                    fp.write(time.strftime("%Y-%m-%d %I:%M:%S %p") + ',' +  ' ERROR ' + 'Twitter_Bot ' + msg + "\n")
+            self.nw_logger.logger('Twitter_Bot' + msg, 'error', 'Error')
         else:
             if self.level == logging.CRITICAL or self.level == logging.WARNING:
-                with open("results.log", "a") as fp:
-                    fp.write(time.strftime("%Y-%m-%d %I:%M:%S %p") +',' +  ' INFO ' + 'Twitter_Bot ' + msg + "\n")
-            self.nw_logger.logger('Twitter_Bot' + msg, 'info', 'results')
+                with open(self.dirpath + "results.log", "a") as fp:
+                    fp.write(time.strftime("%Y-%m-%d %I:%M:%S %p") + ',' +  ' INFO ' + 'Twitter_Bot ' + msg + "\n")
+            self.nw_logger.logger('Twitter_Bot' + msg, 'info', 'Results')
     
     def nawab_read_list(self):
         search_list = []
@@ -140,13 +140,7 @@ class Twitter_Bot(object):
 
         if len(query) > 0:
             for line in query:
-                if self.level == logging.CRITICAL or self.level == logging.WARNING:
-                    with open(self.dirpath + "results.log", "a") as fp:
-                        fp.write(time.strftime("%Y-%m-%d %I:%M:%S %p") + ',' +  ' INFO ' +'Twitter_Bot ' +
-                                "starting new query search: " + line + "\n")
-                        
-                self.nw_logger.logger('Twitter_Bot' +
-                    ' starting new query search: ' + line, 'info', 'Results')
+                self.nawab_log("starting new query search: " + line, 'info')
                 try:
                     for tweets in tweepy.Cursor(api.search, q=line, tweet_mode="extended",
                                                 lang='en', since=latest_date).items(tweet_limit):
@@ -160,49 +154,23 @@ class Twitter_Bot(object):
                         min_freq = 2
 
                         if (self.__nawab_check_tweet(id)) and ('RT @' in text):
-                            if self.level == logging.WARNING:
-                                with open(self.dirpath + "error.log", "a") as fp:
-                                    fp.write(time.strftime("%Y-%m-%d %I:%M:%S %p") +',' +  ' ERROR ' + 'Twitter_Bot ' +
-                                        str(id)  + " already exists in the database or it is a retweet\n")
-                            self.nw_logger.logger('Twitter_Bot ' +
-                                str(id) + ' already exists in the database or it is a retweet', 'error', 'Error')
+                            self.nawab_log(str(id) + ' already exists in the database or it is a retweet', 'error')
                         else:
                             if (self.__isUserwhitelisted(user) or (self.__isUserBanned(user, admin_user) and self.__isSafeKeyword(text))):
                                 if not (self.__nawab_check_tweet(id)):
                                     ##check if it is a relevant tweet
                                     if self.__nawab_check_relevant(query, text) >= min_freq:
-                                        if self.level == logging.CRITICAL or self.level == logging.WARNING:
-                                            with open(self.dirpath + "results.log", "a") as fp:
-                                                fp.write(time.strftime("%Y-%m-%d %I:%M:%S %p") + "," + ' INFO ' + 'Twitter_Bot ' + "Id: " + str(id) +
-                                                        " is a relevant tweet and is stored to the db from this iteration \n")
-
-                                        self.nw_logger.logger('Twitter_Bot ' +
-                                                            'Id: ' + str(id) + 'is a relevant tweet and is  stored to the db from this iteration', 'info', 'Results')
+                                        self.nawab_log('Id: ' + str(id) + 'is a relevant tweet and is  stored to the db from this iteration', 'info')
                                         self.nawab_store_id(id, True)
                                     else:
-                                        if self.level == logging.CRITICAL or self.level == logging.WARNING:
-                                            with open(self.dirpath + "results.log", "a") as fp:
-                                                fp.write(time.strftime("%Y-%m-%d %I:%M:%S %p") + "," + ' INFO ' + 'Twitter_Bot ' + "Id: " + str(id) +
-                                                        " is not a relevant tweet and is stored to the db from this iteration \n")
-
-                                        self.nw_logger.logger('Twitter_Bot ' +
-                                                            'Id: ' + str(id) + 'is not a relevant tweet and will not be  from this iteration', 'info', 'Results')
+                                        self.nawab_log('Id: ' + str(id) + 'is not a relevant tweet and will not be  from this iteration', 'info')
                                         self.nawab_store_id(id, False)
                                 url = 'https://twitter.com/' + \
                                     user + '/status/' + str(id)
 
-                                if self.level == logging.CRITICAL or self.level == logging.WARNING:
-                                    with open(self.dirpath + "results.log", "a") as fp:  
-                                        fp.write(time.strftime("%Y-%m-%d %I:%M:%S %p") + ',' + ' INFO '
-                                                +'Twitter_Bot ' + url + '\n')   
-                                self.nw_logger.logger('Twitter_Bot ' + url, 'info', 'Results')
+                                self.nawab_log(url,'info')
                 except tweepy.TweepError as e:
-                    if self.level == logging.CRITICAL:
-                        with open(self.dirpath + "error.log", "a") as fp:
-                            fp.write(time.strftime("%Y-%m-%d %I:%M:%S %p") + ',' +  ' ERROR ' + 'Twitter_Bot '
-                                    +"Tweepy failed at " + str(id) + " because of " + e.reason + "\n")
-                    self.nw_logger.logger('Twitter_Bot' +
-                        ' Tweepy failed at ' + str(id) + ' because of ' + e.reason, 'error', 'Error')
+                    self.nawab_log(' Tweepy failed at ' + str(id) + ' because of ' + e.reason, 'error')
                     pass
 
     def nawab_retweet_tweet(self, api):
@@ -215,21 +183,9 @@ class Twitter_Bot(object):
                 api.retweet(tweet_id)
                 retweet_url = 'https://twitter.com/' + \
                     rt_username + '/status/' + str(tweet_id)
-                if self.level == logging.CRITICAL or self.level == logging.WARNING:
-                        with open(self.dirpath + "results.log", "a") as fp:
-                            fp.write(time.strftime("%Y-%m-%d %I:%M:%S %p") + ',' +  ' INFO ' + 'Twitter_Bot ' +
-                                    "Nawab retweeted " + str(tweet_id) + " successfully \n")
-                            
-                self.nw_logger.logger('Twitter_Bot' + ' Nawab retweeted ' +
-                                        str(tweet_id) + ' successfully', 'info', 'Results')
+                self.nawab_log(' Nawab retweeted ' + str(tweet_id) + ' successfully', 'info')
 
             except tweepy.TweepError as e:
-                if self.level == logging.CRITICAL:
-                        with open(self.dirpath + "error.log", "a") as fp:
-                            fp.write(time.strftime("%Y-%m-%d %I:%M:%S %p") +',' +  ' ERROR ' + 'Twitter_Bot ' +
-                                    "Tweepy failed to retweet after reading from the store of id " +
-                                    str(tweet_id)  +" because of " + e.reason + "\n")
-
-                self.nw_logger.logger('Twitter_Bot' + ' Tweepy failed to retweet after reading from the store of id ' +
-                                        str(tweet_id) + ' because of ' + e.reason, 'error', 'Error')
+                self.nawab_log(' Tweepy failed to retweet after reading from the store of id ' + str(tweet_id) +
+                                ' because of ' + e.reason, 'error')
                 pass
