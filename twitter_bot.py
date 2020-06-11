@@ -90,7 +90,7 @@ class Twitter_Bot(object):
             return True
         return False
 
-    def __isUserBanned(self, userName, admin_user):
+    def isUserBanned(self, userName, admin_user):
         """
         Search if the Blacklisted user is in file,and blacklist the bot's account
         """
@@ -98,7 +98,7 @@ class Twitter_Bot(object):
             return True
         return False
 
-    def __isSafeKeyword(self, tweetText):
+    def isSafeKeyword(self, tweetText):
         """
         Search if tweettext is safe
         """ 
@@ -130,7 +130,7 @@ class Twitter_Bot(object):
                 break
         return previous_date
 
-    def __nawab_check_relevant(self, query, text):
+    def nawab_check_relevant(self, query, text):
         """
         check for count of keywords in text
         """
@@ -141,7 +141,7 @@ class Twitter_Bot(object):
                 cnt += text.count(key)
         return cnt
 
-    def __nawab_check_tweet(self, tweet_id):
+    def nawab_check_tweet(self, tweet_id):
         """
         Check if current tweet id is in tid_store or not
         """
@@ -180,13 +180,13 @@ class Twitter_Bot(object):
                         ## minimum no of keywords required
                         min_freq = 2
 
-                        if (self.__nawab_check_tweet(id)) and ('RT @' in text):
+                        if (self.nawab_check_tweet(id)) and ('RT @' in text):
                             self.nawab_log(str(id) + ' already exists in the database or it is a retweet', 'error', 'Twitter_Bot ')
                         else:
-                            if (self.__isUserwhitelisted(user) or (self.__isUserBanned(user, admin_user) and self.__isSafeKeyword(text))):
-                                if not (self.__nawab_check_tweet(id)):
+                            if (self.__isUserwhitelisted(user) or (self.isUserBanned(user, admin_user) and self.isSafeKeyword(text))):
+                                if not (self.nawab_check_tweet(id)):
                                     ##check if it is a relevant tweet
-                                    if self.__nawab_check_relevant(query, text) >= min_freq:
+                                    if self.nawab_check_relevant(query, text) >= min_freq:
                                         self.nawab_log('Id: ' + str(id) + 'is a relevant tweet and is  stored to the db from this iteration', 'info', 'Twitter_Bot ')
                                         self.nawab_store_id(id, True)
                                     else:
