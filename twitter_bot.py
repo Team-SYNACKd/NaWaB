@@ -33,6 +33,9 @@ class Twitter_Bot(object):
                 writer.writerow(Headers)
     
     def nawab_twitter_authenticate(self):
+        """
+        To return the twitter api
+        """
         auth = tweepy.OAuthHandler(
             config.tw_consumer_key, config.tw_consumer_secret)
         auth.set_access_token(config.tw_access_token_key,
@@ -54,13 +57,18 @@ class Twitter_Bot(object):
             self.nw_logger.logger('Twitter_Bot' + msg, 'info', 'Results')
     
     def nawab_read_list(self):
+        """
+        To read the list of Proto_list 
+        """
         search_list = []
         for index, row in self.data.iterrows():
             search_list.append(row["Proto_list"])
         return (search_list)
 
     def nawab_store_id(self, tweet_id, isrelevant):
-        ### Store a tweet id in a file
+        """
+        Store a tweet id in a file
+        """ 
         if isrelevant:
             dicts = {'Date_time': [datetime.now()],
                     'Id': [str(tweet_id)]}
@@ -75,32 +83,40 @@ class Twitter_Bot(object):
                         mode='a', header=False, index=False)
 
     def __isUserwhitelisted(self, userName):
-        ### Search if the Whitelist user is in file
+        """
+        Search if the Whitelist user is in file
+        """ 
         if any(str(acc["Whitelist"]).lower() == userName.lower() for index, acc in self.data.iterrows()):
             return True
         return False
 
     def __isUserBanned(self, userName, admin_user):
-        ### Search if the Blacklisted user is in file,and blacklist the bot's account
+        """
+        Search if the Blacklisted user is in file,and blacklist the bot's account
+        """
         if not any((str(acc["Blacklist"]).lower() == userName.lower()) or (admin_user.lower() == userName.lower()) for index, acc in self.data.iterrows()):
             return True
         return False
 
-    """Get banned words for a safer content tweets by nawab"""
-
     def __isSafeKeyword(self, tweetText):
-        ### Search if tweettext is safe
+        """
+        Search if tweettext is safe
+        """ 
         if not any(str(word["Banwords"]).lower() in tweetText.lower() for index, word in self.data.iterrows()):
             return True
         return False
 
     def nawab_get_id(self):
-        ### Read the  retweeted id from tid_store
+        """
+        Read the  retweeted id from tid_store
+        """ 
         tid_store = pd.read_csv(self.dirpath + 'tid_store.csv')
         return tid_store['Id']  
 
     def nawab_find_prev_date(self):
-        """to find the previous date in the tid"""
+        """
+        To find the previous date in the tid
+        """
         tid = pd.read_csv(self.dirpath + 'tid_store.csv')
         tid["Date_time"]= pd.to_datetime(tid["Date_time"])
         previous_datetime = tid['Date_time'].iloc[-1]
@@ -115,7 +131,9 @@ class Twitter_Bot(object):
         return previous_date
 
     def __nawab_check_relevant(self, query, text):
-        """Check for count of keywords in text"""
+        """
+        check for count of keywords in text
+        """
         cnt = 0
         for line in query:
             key = str(line).strip('#')
@@ -124,6 +142,9 @@ class Twitter_Bot(object):
         return cnt
 
     def __nawab_check_tweet(self, tweet_id):
+        """
+        Check if current tweet id is in tid_store or not
+        """
         tid_store = self.nawab_get_id()
         if any(tid == tweet_id for tid in tid_store):
             return True
@@ -131,10 +152,16 @@ class Twitter_Bot(object):
             return False
 
     def nawab_curate_list(self, api):
+        """
+        Fetch the query and initiate the search
+        """
         query = self.nawab_read_list()
         self.nawab_search(api, query)
 
     def nawab_search(self, api, query):
+        """
+        Start searching accoring to line of query
+        """
         tweet_limit = 1
         latest_date = date.today()
 
@@ -174,6 +201,9 @@ class Twitter_Bot(object):
                     pass
 
     def nawab_retweet_tweet(self, api):
+        """
+        To retweet the tweets fetched
+        """
         tid_store = self.nawab_get_id()
         for tid in tid_store:
             tweet_id = int(tid)

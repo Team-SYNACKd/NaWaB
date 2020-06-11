@@ -4,11 +4,13 @@ import logging
 class Nawab_Logging(object):
 
     def __init__(self, dirpath, level):
-       self.setup_logger('Results', dirpath + "results.log", level)
-       self.setup_logger('Error', dirpath + "error.log", level)
+        self.setup_logger('Results', dirpath + "results.log", level)
+        self.setup_logger('Error', dirpath + "error.log", level)
 
-     ##setting up the logger
     def setup_logger(self, logger_name, log_file, level=logging.INFO):
+        """
+        setting up the logger
+        """
         log_setup = logging.getLogger(logger_name)
         formatter = logging.Formatter(fmt=
                 '%(asctime)s, %(levelname)-4s %(message)s', datefmt='%Y-%m-%d %I:%M:%S %p')
