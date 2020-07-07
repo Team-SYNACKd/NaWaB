@@ -29,7 +29,7 @@ class TestTwitter_Bot(unittest.TestCase):
     def test_relevant(self):
         
         search_list = ['#netsec', '#DNS', '#DANE', '#DNSSEC', '#QUIC', '#TCP/UDP', '#BGP', '#Routing', '#IP', '#IPv4', '#IPv6'
-                       , '#SNI', '#HTTP/0.9', '#HTTP0.9', '#HTTP2', '#HTTP/2', '#HTTP3', '#HTTP/3', '#TLS', '#TCP', '#UDP']
+                    , '#SNI', '#HTTP/0.9', '#HTTP0.9', '#HTTP2', '#HTTP/2', '#HTTP3', '#HTTP/3', '#TLS', '#TCP', '#UDP']
         
         tweet_text1 = "iPhone SE delivery times suggest supply has caught up with demand https://t.co/yXoEdrLx5X TLS News"
         self.assertEqual(self.tw1.nawab_check_relevant(search_list,tweet_text1),1)
@@ -45,8 +45,8 @@ class TestTwitter_Bot(unittest.TestCase):
     def test_isUserBanned(self):
         
         """ Check for Banned user"""
-        self.assertEqual(self.tw1.isUserBanned("Ananthan2k","Ananthan2k"),True)
-        self.assertEqual(self.tw1.isUserBanned("Pornhub","Ananthan2k"),False)
+        self.assertEqual(self.tw1.isUserBanned("Ananthan2k","Ananthan2k"),False)
+        self.assertEqual(self.tw1.isUserBanned("freeman","jumbo_lane"),True)
         
     def test_isSafeword(self):
         
