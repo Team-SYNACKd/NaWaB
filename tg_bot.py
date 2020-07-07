@@ -50,12 +50,13 @@ class Telegram_Bot(object):
 
         # the previous date from which the tweets need to be sent
         previous_date = self.tw_bot.nawab_find_prev_date()
+        previous_datetime = datetime(previous_date.year, previous_date.month, previous_date.day)
         tid = pd.read_csv(self.dirpath + 'tid_store.csv')
         tid['Date_time'] = pd.to_datetime(tid['Date_time'])
 
         for index, tid_store in tid[::-1].iterrows():
             scrape_date = tid_store['Date_time']
-            if scrape_date < previous_date:
+            if scrape_date <= previous_datetime:
                 break
             try:
                 u = self.twitter_api.get_status(id=tid_store['Id'])

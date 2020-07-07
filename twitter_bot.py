@@ -90,11 +90,12 @@ class Twitter_Bot(object):
         """to find the previous date in the tid"""
         tid = pd.read_csv(self.dirpath + 'tid_store.csv')
         tid["Date_time"]= pd.to_datetime(tid["Date_time"])
-        previous_date = tid['Date_time'].iloc[-1]
+        previous_datetime = tid['Date_time'].iloc[-1]
         #find the previous date by iterating tid_store bottom-up 
         for index, tid_store in tid[::-1].iterrows():
             scrape_datetime = tid_store['Date_time']
             scrape_date = date(scrape_datetime.year, scrape_datetime.month, scrape_datetime.day)
+            previous_date = date(previous_datetime.year, previous_datetime.month, previous_datetime.day)
             if scrape_date!=previous_date:
                 previous_date = scrape_date
                 break
