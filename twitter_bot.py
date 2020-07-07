@@ -6,7 +6,7 @@ import tweepy
 import mmap
 import time
 import random
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 import csv
 import os
 import logging
